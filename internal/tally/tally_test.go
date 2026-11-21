@@ -32,6 +32,22 @@ func TestTotalsAreLargestFirstWithTiesByName(t *testing.T) {
 	}
 }
 
+func TestProjectTotalSumsOnlyTheNamedProject(t *testing.T) {
+	got := ProjectTotal([]Entry{{Project: "site", Minutes: 90}, {Project: "docs", Minutes: 45}, {Project: "site", Minutes: 120}}, "site")
+	want := Total{Project: "site", Minutes: 210}
+	if got != want {
+		t.Fatalf("got %+v, want %+v", got, want)
+	}
+}
+
+func TestProjectTotalIsZeroForAProjectWithNoEntries(t *testing.T) {
+	got := ProjectTotal([]Entry{{Project: "site", Minutes: 90}}, "nope")
+	want := Total{Project: "nope", Minutes: 0}
+	if got != want {
+		t.Fatalf("got %+v, want %+v", got, want)
+	}
+}
+
 func TestFormatPadsMinutes(t *testing.T) {
 	if Format(65) != "1h05m" {
 		t.Fatalf("got %s", Format(65))
