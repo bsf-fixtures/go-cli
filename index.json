@@ -1,13 +1,13 @@
 {
   "schema": "index/1",
-  "updated_at": "2026-11-21T18:41:58.767Z",
+  "updated_at": "2026-11-21T21:25:11.339Z",
   "factory": {
     "runner": "0.1.0 source",
-    "harness": "cursor-cli"
+    "harness": "claude-code"
   },
   "metrics": {
     "window_days": 30,
-    "runs": 5,
+    "runs": 6,
     "merged": 1,
     "escalated": 0,
     "automation_rate": 0,
@@ -18,7 +18,7 @@
     "cycle_time_p90_sec": 28013,
     "by_pipeline": {
       "product_work": {
-        "runs": 2,
+        "runs": 3,
         "merged": 1,
         "spend_usd": 2.43,
         "revert_rate": 0
@@ -32,6 +32,7 @@
     }
   },
   "recent_runs": [
+    "run_01M7ZZQB1M4JG9MZ2RVZKYJK4W",
     "run_01M7ZN0R6CE1BXZZERH15NDNEG",
     "run_01M7ZF3TW97YZZ10TXRA4Z36G1",
     "run_01M7Z7WF8G0170B4699R3CBDHN",
