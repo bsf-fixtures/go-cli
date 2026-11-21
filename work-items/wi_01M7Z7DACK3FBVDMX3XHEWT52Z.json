@@ -19,8 +19,11 @@
     "run_01M7Z7WF8G0170B4699R3CBDHN",
     "run_01M7ZF3TW97YZZ10TXRA4Z36G1"
   ],
-  "pr": 19,
+  "pr": 20,
   "parent": null,
   "related": [],
-  "spec": null
+  "spec": null,
+  "previous_prs": [
+    19
+  ]
 }

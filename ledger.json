@@ -1,6 +1,6 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-21T16:30:29.769Z",
+  "updated_at": "2026-11-21T16:38:46.385Z",
   "open": [
     {
       "work_item": "wi_01M7Z7DACKN4W4K15ZXCFXR7MY",
@@ -24,7 +24,7 @@
       "fixes": [
         "untested behaviour in cmd/tally"
       ],
-      "pr": 19
+      "pr": 20
     }
   ],
   "recent": [
