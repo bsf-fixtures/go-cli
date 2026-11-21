@@ -38,7 +38,7 @@ limits:
     max_runs: 5
 
 budget:
-  monthly_usd: 35
+  monthly_usd: 0.01
   # Defaults to the plan's included minutes; null on public repos, where
   # standard runners are free.
   monthly_actions_minutes: 2000
