@@ -14,7 +14,7 @@
   "body": "found by the gardener\n\nFiles:\n- internal/tally/tally_test.go",
   "priority": "normal",
   "fingerprint": "sha256:b50927e39a127918492fe7140a7262788aaffeb161d7eefb44a5152e0ea11a57",
-  "status": "running",
+  "status": "in_review",
   "runs": [
     "run_01M7Z7DY01B8J23J5Z86FYCZ4M"
   ],
