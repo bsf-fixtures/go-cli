@@ -1,0 +1,9 @@
+=== without --project ===
+site                 3h30m
+docs                 0h45m
+total                4h15m
+exit=0
+
+=== with --project site ===
+site                 3h30m
+exit=0
