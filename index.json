@@ -1,6 +1,6 @@
 {
   "schema": "index/1",
-  "updated_at": "2026-11-21T18:41:19.962Z",
+  "updated_at": "2026-11-21T18:41:58.767Z",
   "factory": {
     "runner": "0.1.0 source",
     "harness": "cursor-cli"
