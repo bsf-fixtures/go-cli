@@ -1,0 +1,35 @@
+{
+  "role": "builder",
+  "attempt": 3,
+  "report": {
+    "schema": "pr-report/1",
+    "summary": [
+      "Parse rejects a timesheet line whose project is `-`, naming the line.",
+      "Why: `-` was accepted as a project literally named `-`.",
+      "Users see `tally: line 2: \"-\" is not a project name like site` on stderr and exit 1."
+    ],
+    "blocks": [
+      {
+        "type": "diagram",
+        "title": "Parse checks per line",
+        "mermaid": "flowchart LR\n  A[fields] --> B[day] --> C{project is -?} -->|yes| E[error with line number]\n  C -->|no| D[duration] --> F[entry]"
+      }
+    ],
+    "focus": [
+      {
+        "title": "New check in Parse",
+        "detail": "Only the exact field `-` is rejected; names containing `-` are unchanged.",
+        "files": [
+          "internal/tally/tally.go"
+        ]
+      }
+    ],
+    "technical": "technical.md",
+    "conceptual": "conceptual.md"
+  },
+  "media_commit": "0fa2b3f2cc6469c13c12f71c65cfbf0ef3d78214",
+  "media_prefix": "reports/wi_01M801NDVB1TZJ29GF6MT0VSKJ/builder-3",
+  "inline": {},
+  "problems": [],
+  "stored_at": "2026-11-21T22:14:53.180Z"
+}
