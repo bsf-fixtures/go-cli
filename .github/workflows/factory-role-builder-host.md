@@ -22,6 +22,11 @@ on:
         description: This role's model, from factory.yaml, read by the caller with `bsf models`
         required: true
         type: string
+      budget_key:
+        description: Where this step's budget hold is kept; the caller settles it with the same key
+        required: false
+        default: ''
+        type: string
       work_item:
         description: Work item id, e.g. wi_01JD8Z...
         required: true
@@ -65,12 +70,16 @@ github-app:
   client-id: ${{ vars.FACTORY_APP_CLIENT_ID }}
   private-key: ${{ secrets.FACTORY_APP_PRIVATE_KEY }}
 
-# Derived by runner/scripts/harness-variants.mjs for the cursor engine.
 engine:
-  id: cursor
+  id: claude
   model: ${{ inputs.model }}
-imports:
-  - shared/cursor.md
+  env:
+    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    # Bounds on any one request, which is what the budget's margin is built
+    # on: the 200k window instead of 1M, and Claude Code's default output cap
+    # made explicit. Change one and the budget's ceilings are wrong.
+    CLAUDE_CODE_DISABLE_1M_CONTEXT: "1"
+    CLAUDE_CODE_MAX_OUTPUT_TOKENS: "32000"
 
 permissions:
   contents: read
@@ -155,7 +164,8 @@ safe-outputs:
       model: claude-haiku-5-5
       max-turns: 3
       env:
-        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        CLAUDE_CODE_DISABLE_1M_CONTEXT: "1"
+        CLAUDE_CODE_MAX_OUTPUT_TOKENS: "32000"
     max-ai-credits: 50
   # No upload-artifact safe output here: with create-pull-request beside it,
   # gh-aw 1.2 and 1.3 put the PR checkout ahead of the App token it reads, and
@@ -192,6 +202,27 @@ pre-agent-steps:
       rm -rf .factory-trusted
       echo "$RUNNER_TEMP/bsf" >> "$GITHUB_PATH"
       "$RUNNER_TEMP/bsf/bsf" --version
+  # The budget: this step starts only if what is spent this month, what
+  # running steps hold, and the most this step can cost (its credit cap plus
+  # one request past it, for the agent and for threat detection) all fit.
+  # A refusal fails here, before the agent spends anything.
+  - name: Mint a token for the budget record
+    id: budget-token
+    uses: actions/create-github-app-token@v1
+    with:
+      app-id: ${{ vars.FACTORY_APP_CLIENT_ID }}
+      private-key: ${{ secrets.FACTORY_APP_PRIVATE_KEY }}
+      permission-contents: write
+      owner: ${{ github.repository_owner }}
+      repositories: ${{ github.event.repository.name }}
+  - name: Hold this step's budget
+    shell: bash
+    env:
+      GH_TOKEN: ${{ steps.budget-token.outputs.token }}
+      BUDGET_KEY: ${{ inputs.budget_key || format('{0}-{1}-builder-{2}', github.run_id, github.run_attempt, inputs.attempt) }}
+      PIPELINE: ${{ inputs.pipeline }}
+      MODEL: ${{ inputs.model }}
+    run: bsf budget reserve --key "$BUDGET_KEY" --pipeline "$PIPELINE" --role builder --model "$MODEL" --cap 400 --detection-model claude-haiku-5-5 --detection-cap 50
   # Read-only, for the steps that fetch this item's data before the agent
   # starts. Minted here rather than handed to the agent: step outputs never
   # reach the agent's sandbox.
@@ -240,6 +271,26 @@ pre-agent-steps:
     run: bsf conflicts context "$WORK_ITEM" --out /tmp/gh-aw/agent/bsf/rebuild
 
 post-steps:
+  # What this step spent, for the caller's settle job: the agent's cost as
+  # the session recorded it (or priced from its tokens at list price, if
+  # higher), and the name of the threat-detection artifact, whose usage the
+  # settle job prices. Runs even when the agent failed: a failed step spent
+  # too, and a missing measure is charged at the ceiling.
+  - name: Measure this step's cost for the budget
+    if: always()
+    shell: bash
+    env:
+      BUDGET_KEY: ${{ inputs.budget_key || format('{0}-{1}-builder-{2}', github.run_id, github.run_attempt, inputs.attempt) }}
+      MODEL: ${{ inputs.model }}
+      DETECTION_ARTIFACT: ${{ needs.activation.outputs.artifact_prefix }}detection
+    run: bsf budget measure --key "$BUDGET_KEY" --model "$MODEL" --detection-artifact "$DETECTION_ARTIFACT" --out /tmp/gh-aw/bsf-budget/measure.json
+  - name: Upload the budget measure
+    if: always()
+    uses: actions/upload-artifact@v4
+    with:
+      name: budget-${{ inputs.budget_key || format('{0}-{1}-x', github.run_id, github.run_attempt) }}
+      path: /tmp/gh-aw/bsf-budget/measure.json
+      if-no-files-found: ignore
   # Write access, only after the agent has exited, for the steps that store
   # what it produced on the factory's data ref.
   - name: Mint a token to store this step's results
@@ -274,7 +325,7 @@ post-steps:
       ROLE: builder
       ATTEMPT: ${{ inputs.attempt }}
       MODEL: ${{ inputs.model }}
-    run: bsf step-report --harness cursor-cli --role "$ROLE" --attempt "$ATTEMPT" --model "$MODEL" --out /tmp/gh-aw/agent/bsf/step-report.json
+    run: bsf step-report --role "$ROLE" --attempt "$ATTEMPT" --model "$MODEL" --out /tmp/gh-aw/agent/bsf/step-report.json
   - name: Upload the StepReport
     uses: actions/upload-artifact@v4
     with:

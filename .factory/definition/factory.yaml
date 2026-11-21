@@ -2,17 +2,17 @@
 # human's approval. Setup fills in the placeholders.
 schema: factory/1
 
-harness: cursor-cli
+harness: claude-code
 
 # Model per step. The scheduled review may change these, benchmark-gated.
 models:
-  triage: auto
-  spec: auto
-  builder: auto
-  verifier: auto
-  gardener: auto
-  hardener: auto
-  scorer: auto
+  triage: claude-haiku-5-5
+  spec: claude-opus-5-5
+  builder: claude-sonnet-5-5
+  verifier: claude-haiku-5-5
+  gardener: claude-sonnet-5-5
+  hardener: claude-sonnet-5-5
+  scorer: claude-haiku-5-5
 
 pipelines:
   product_work:
