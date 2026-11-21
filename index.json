@@ -1,0 +1,51 @@
+{
+  "schema": "index/1",
+  "updated_at": "2026-11-21T16:54:14.452Z",
+  "factory": {
+    "runner": "0.1.0 source",
+    "harness": "claude-code"
+  },
+  "metrics": {
+    "window_days": 30,
+    "runs": 4,
+    "merged": 1,
+    "escalated": 0,
+    "automation_rate": 0,
+    "human_interactions_per_pr": null,
+    "revert_rate": 0,
+    "spend_usd": 5.36,
+    "cycle_time_p50_sec": 28013,
+    "cycle_time_p90_sec": 28013,
+    "by_pipeline": {
+      "product_work": {
+        "runs": 1,
+        "merged": 1,
+        "spend_usd": 2.43,
+        "revert_rate": 0
+      },
+      "gardening": {
+        "runs": 3,
+        "merged": 0,
+        "spend_usd": 2.93,
+        "revert_rate": 0
+      }
+    }
+  },
+  "recent_runs": [
+    "run_01M7ZF3TW97YZZ10TXRA4Z36G1",
+    "run_01M7Z7WF8G0170B4699R3CBDHN",
+    "run_01M7Z7DY01B8J23J5Z86FYCZ4M",
+    "run_01M7YHTAEW59S26YGJV9BBXR13"
+  ],
+  "guardrails": {
+    "rules": 0,
+    "baselined": 0,
+    "coverage_floor_pct": 0,
+    "candidates_pending": 0
+  },
+  "health": {
+    "sandbox_profile": "docker",
+    "enforcement": "audit",
+    "gardening_schedule_active": true
+  }
+}

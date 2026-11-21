@@ -1,30 +1,24 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-21T16:49:02.560Z",
+  "updated_at": "2026-11-21T16:54:14.452Z",
   "open": [
-    {
-      "work_item": "wi_01M7Z7DACKN4W4K15ZXCFXR7MY",
-      "pipeline": "gardening",
-      "status": "in_review",
-      "fingerprint": "sha256:b50927e39a127918492fe7140a7262788aaffeb161d7eefb44a5152e0ea11a57",
-      "priority": "normal",
-      "created_at": "2026-11-21T14:15:51.955Z",
-      "fixes": [
-        "untested Parse branches in internal/tally"
-      ],
-      "pr": 18
-    },
     {
       "work_item": "wi_01M7Z7DACK3FBVDMX3XHEWT52Z",
       "pipeline": "gardening",
       "status": "in_review",
-      "fingerprint": "sha256:ac9f5ab92b35279481573ccf2e122ac65f4a2755ea29250b2221a1dd5b27b714",
       "priority": "normal",
       "created_at": "2026-11-21T14:15:51.955Z",
-      "fixes": [
-        "untested behaviour in cmd/tally"
-      ],
+      "fingerprint": "sha256:ac9f5ab92b35279481573ccf2e122ac65f4a2755ea29250b2221a1dd5b27b714",
       "pr": 20
+    },
+    {
+      "work_item": "wi_01M7Z7DACKN4W4K15ZXCFXR7MY",
+      "pipeline": "gardening",
+      "status": "in_review",
+      "priority": "normal",
+      "created_at": "2026-11-21T14:15:51.955Z",
+      "fingerprint": "sha256:b50927e39a127918492fe7140a7262788aaffeb161d7eefb44a5152e0ea11a57",
+      "pr": 18
     }
   ],
   "recent": [
