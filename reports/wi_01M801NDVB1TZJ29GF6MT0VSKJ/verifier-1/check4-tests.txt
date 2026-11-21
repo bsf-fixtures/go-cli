@@ -1,0 +1,11 @@
+Check 4: go vet ./... && go test ./...
+vet: ok
+ok  	github.com/bsf-fixtures/go-cli/cmd/tally	(cached)
+ok  	github.com/bsf-fixtures/go-cli/internal/tally	(cached)
+--- new test against pre-fix tally.go (1436e4a), expected FAIL:
+--- FAIL: TestParseRejectsADashProjectAndNamesItsLine (0.00s)
+    tally_test.go:60: got <nil>
+FAIL
+FAIL	github.com/bsf-fixtures/go-cli/internal/tally	0.003s
+FAIL
+go test exit=1

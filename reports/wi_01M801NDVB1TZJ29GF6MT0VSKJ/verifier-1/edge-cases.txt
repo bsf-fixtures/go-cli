@@ -1,0 +1,7 @@
+Edge cases after the fix:
+my-site              0h45m
+exit=0
+tally: line 1: "-" is not a project name like site
+exit=1
+site                 1h00m
+exit=0

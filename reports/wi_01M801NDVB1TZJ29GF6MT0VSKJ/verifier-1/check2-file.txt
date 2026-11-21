@@ -1,0 +1,5 @@
+Acceptance check 2 (file argument). Command: ./tally bad-dash.txt (lines: '2026-11-20 site 1h30m', '2026-11-20 - 45m')
+stdout (bytes): 0
+stderr:
+tally: line 2: "-" is not a project name like site
+exit=1

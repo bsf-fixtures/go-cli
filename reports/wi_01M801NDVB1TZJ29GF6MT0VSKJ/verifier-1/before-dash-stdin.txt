@@ -1,0 +1,6 @@
+Before the fix (parent 1436e4a built separately). Command: printf '2026-11-20 site 1h30m\n2026-11-20 - 45m\n' | tally-before
+stdout:
+site                 1h30m
+-                    0h45m
+stderr (bytes): 0
+exit=0
