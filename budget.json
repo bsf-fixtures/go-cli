@@ -3,19 +3,9 @@
   "month": "2026-11",
   "spent_usd": {
     "unknown": 0.155,
-    "product_work": 4.1017
+    "product_work": 4.2064
   },
-  "inflight": [
-    {
-      "key": "44954353265-1-triage",
-      "pipeline": "product_work",
-      "role": "triage",
-      "model": "claude-haiku-5-5",
-      "agent_ceiling_usd": 0.63,
-      "detection_ceiling_usd": 0.83,
-      "started_at": "2026-11-21T22:01:24.589Z"
-    }
-  ],
+  "inflight": [],
   "settled": [
     "44951031834-1-triage",
     "44951424102-1-triage",
@@ -24,7 +14,8 @@
     "44951641731-1-spec",
     "44951641731-1-build",
     "44953021647-1-build",
-    "44953393500-1-build"
+    "44953393500-1-build",
+    "44954353265-1-triage"
   ],
-  "updated_at": "2026-11-21T22:01:24.589Z"
+  "updated_at": "2026-11-21T22:05:26.266Z"
 }
