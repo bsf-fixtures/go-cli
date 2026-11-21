@@ -22,6 +22,18 @@ func TestRunWithProjectFlagPrintsOnlyThatProject(t *testing.T) {
 	}
 }
 
+func TestRunWithProjectFlagOmitsGrandTotal(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"--project", "site"}, strings.NewReader(twoProjects), &stdout, &stderr)
+	want := "site                 3h30m\n"
+	if code != 0 || stdout.String() != want {
+		t.Fatalf("got code %d stdout %q stderr %q, want code 0 stdout %q", code, stdout.String(), stderr.String(), want)
+	}
+	if strings.Contains(stdout.String(), "total") {
+		t.Fatalf("got %q, want no grand-total line with --project", stdout.String())
+	}
+}
+
 func TestRunPrintsZeroForAProjectWithNoEntries(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	code := run([]string{"--project", "nope"}, strings.NewReader(twoProjects), &stdout, &stderr)
@@ -31,10 +43,10 @@ func TestRunPrintsZeroForAProjectWithNoEntries(t *testing.T) {
 	}
 }
 
-func TestRunWithoutProjectFlagPrintsEveryProjectLargestFirst(t *testing.T) {
+func TestRunWithoutProjectFlagEndsWithGrandTotal(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	code := run(nil, strings.NewReader(twoProjects), &stdout, &stderr)
-	want := "site                 3h30m\ndocs                 0h45m\n"
+	want := "site                 3h30m\ndocs                 0h45m\ntotal                4h15m\n"
 	if code != 0 || stdout.String() != want {
 		t.Fatalf("got code %d stdout %q stderr %q, want code 0 stdout %q", code, stdout.String(), stderr.String(), want)
 	}
@@ -62,7 +74,7 @@ func TestRunReadsTheFileNamedByThePositionalArgument(t *testing.T) {
 	}
 	var stdout, stderr bytes.Buffer
 	code := run([]string{path}, strings.NewReader(twoProjects), &stdout, &stderr)
-	want := "docs                 0h45m\n"
+	want := "docs                 0h45m\ntotal                0h45m\n"
 	if code != 0 || stdout.String() != want {
 		t.Fatalf("got code %d stdout %q stderr %q, want code 0 stdout %q", code, stdout.String(), stderr.String(), want)
 	}
