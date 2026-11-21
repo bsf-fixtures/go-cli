@@ -7,8 +7,21 @@
     "build": "go build ./... && go build -o tally ./cmd/tally",
     "run": "printf '2026-11-20 site 1h30m\\n2026-11-20 docs 45m\\n' | ./tally",
     "test": "go vet ./... && go test ./...",
+    "coverage": "go vet ./... && mkdir -p coverage && go test -covermode=count -coverpkg=./... -coverprofile=coverage/cover.out ./... && awk -v mod=\"$(go list -m)\" 'NR==1{next} {split($1,p,\":\"); f=p[1]; sub(\"^\" mod \"/\",\"\",f); split(p[2],r,\",\"); split(r[1],a,\".\"); split(r[2],b,\".\"); for(l=a[1]+0;l<=b[1]+0;l++){k=f \":\" l; if(!(k in hit)) hit[k]=0; hit[k]+=$3+0} if(!(f in maxl)||b[1]+0>maxl[f]) maxl[f]=b[1]+0; files[f]=1} END{for(f in files){printf \"TN:\\nSF:%s\\n\",f; lf=0; lh=0; for(l=1;l<=maxl[f];l++){k=f \":\" l; if(k in hit){printf \"DA:%d,%d\\n\",l,hit[k]; lf++; if(hit[k]>0) lh++}} printf \"LF:%d\\nLH:%d\\nend_of_record\\n\",lf,lh}}' coverage/cover.out > coverage/lcov.info",
     "seed": null
   },
+  "coverage_report": {
+    "path": "coverage/lcov.info",
+    "format": "lcov"
+  },
+  "static_checks": [
+    {
+      "name": "gofmt",
+      "command": "mkdir -p .bsf-reports && gofmt -l . | awk 'BEGIN{printf \"{\\\"version\\\":\\\"2.1.0\\\",\\\"$schema\\\":\\\"https://json.schemastore.org/sarif-2.1.0.json\\\",\\\"runs\\\":[{\\\"tool\\\":{\\\"driver\\\":{\\\"name\\\":\\\"gofmt\\\",\\\"informationUri\\\":\\\"https://pkg.go.dev/cmd/gofmt\\\",\\\"rules\\\":[{\\\"id\\\":\\\"gofmt\\\",\\\"shortDescription\\\":{\\\"text\\\":\\\"File is not gofmt-formatted\\\"}}]}},\\\"results\\\":[\"; n=0} {sub(/^\\.\\//,\"\"); if(n++) printf \",\"; printf \"{\\\"ruleId\\\":\\\"gofmt\\\",\\\"level\\\":\\\"warning\\\",\\\"message\\\":{\\\"text\\\":\\\"%s is not gofmt-formatted; run gofmt -w %s\\\"},\\\"locations\\\":[{\\\"physicalLocation\\\":{\\\"artifactLocation\\\":{\\\"uri\\\":\\\"%s\\\"},\\\"region\\\":{\\\"startLine\\\":1}}}]}\", $0, $0, $0} END{printf \"]}]}\\n\"}' > .bsf-reports/gofmt.sarif",
+      "sarif": ".bsf-reports/gofmt.sarif",
+      "why": "gofmt ships with the Go toolchain this repo already requires, and .factory/rules/go.yaml detects it from go.mod alone, but the factory's static gate does not run it: for a Go repo it runs `go vet` natively and nothing else. Formatting drift is therefore the one checkable Go defect class that nothing in the factory would otherwise count. The check is binary per file, which is what gofmt means, so each unformatted file is exactly one `gofmt` finding at line 1 and the per-file ratchet reads naturally. staticcheck, the other linter in the rule pack, is deliberately not here: its detect list is .golangci.yml / staticcheck.conf and this repo has neither, so adding it would be adding a tool the repo does not use."
+    }
+  ],
   "app_url": null,
   "env": [],
   "services": [],
@@ -33,13 +46,20 @@
       "from": ".github/workflows/factory-*.yml",
       "what": "The dozen factory-* workflows and .factory/bin/bsf",
       "why": "These are the factory's own machinery operating on this repo, not part of the application under test. Building or running them is not what verifying a change to tally means."
+    },
+    {
+      "from": ".factory/rules/go.yaml",
+      "what": "staticcheck as a static_checks entry (`go install honnef.co/go/tools/cmd/staticcheck@latest` then `staticcheck ./...`)",
+      "why": "Considered during this amendment and left out. The rule pack detects staticcheck from .golangci.yml, .golangci.yaml or staticcheck.conf and this repo has none of them, so it is a checker the repo does not use; installing it would also make every static gate compile a tool from the module proxy before it could check anything. gofmt and the factory's built-in `go vet` are both already here."
     }
   ],
   "capabilities": {
     "exercised": [
       "Compiling every package in the module (`go build ./...`) and linking the `tally` binary that .gitignore expects at the repo root",
-      "`go vet ./...` across cmd/tally and internal/tally",
-      "The unit tests in internal/tally/tally_test.go: comment and blank-line skipping, the named-line parse error, Totals ordering (largest first, ties by name), and Format's zero-padded minutes — 90.0% of statements in internal/tally",
+      "`go vet ./...` across cmd/tally and internal/tally — run by commands.test, by commands.coverage, and natively by the factory's own static gate, which counts its findings per file",
+      "The unit tests in internal/tally/tally_test.go: comment and blank-line skipping, the named-line parse error, Totals ordering (largest first, ties by name), and Format's zero-padded minutes",
+      "Line coverage of **both** packages, written as lcov at coverage/lcov.info. `-coverpkg=./...` instruments every package rather than only the ones with tests, so cmd/tally/main.go appears in the report as 18 lines with 0 covered instead of being absent: measured 35/40 lines in internal/tally/tally.go and 0/18 in cmd/tally/main.go, 60.3% overall",
+      "gofmt formatting across the whole tree, reported as SARIF at .bsf-reports/gofmt.sarif, one `gofmt` finding per unformatted file",
       "Running the built binary on stdin and on a file argument, reading its stdout, and checking its exit status",
       "The malformed-input contract end to end: a bad duration or day prints `tally: line N: ...` on stderr and exits 1 rather than totalling a silent zero",
       "The missing-file path: `./tally /nope.txt` prints `tally: open ...: no such file or directory` and exits 1"
@@ -55,7 +75,17 @@
         "paths": [
           "cmd/tally/main.go"
         ],
-        "why": "There is no test file for package main, so `go test ./...` reports 0.0% of statements there. The behaviour is reachable only by running the binary and reading its output, which verification here does by hand. A change to cmd/tally that needs a coverage number — the coverage gate asks 80% on changed lines — has nothing to count, so it will need a test added alongside it."
+        "why": "There is no test file for package main, so every one of its 18 countable lines is uncovered. Since this amendment it is at least *counted*: it is in the lcov report at 0%, so a PR that changes cmd/tally/main.go now measures 0% diff coverage and fails the 80% gate until a test is added alongside it, rather than reporting 'nothing measurable' and passing. The behaviour itself is reachable only by running the binary and reading its output, which verification here does by hand."
+      },
+      {
+        "what": "Any Go analysis deeper than `go vet` and gofmt — staticcheck's SA/ST/S checks, errcheck, ineffassign and the rest of a golangci-lint suite",
+        "paths": [],
+        "why": "The repo configures none of them: there is no .golangci.yml, no staticcheck.conf, and ci.yml runs only `go vet` and `go test`. Installing one would be adding a tool the repo does not use, so the static gate counts `go vet` (built into the factory) and `gofmt` (declared here) and nothing else. A later decision to adopt golangci-lint would be an amendment, not a silent addition."
+      },
+      {
+        "what": "Branch coverage, and the distinction between a line that ran once and a line that ran in every case that matters",
+        "paths": [],
+        "why": "Go's coverage is statement-based. The lcov report maps each covered block onto the lines it spans, so a line inside a multi-line block counts as covered when the block ran at all. That is the most Go reports; it is not a sandbox limitation that could be fixed here."
       },
       {
         "what": "Behaviour on any OS other than linux/amd64, and on non-UTF-8 or very large timesheets",
@@ -100,7 +130,37 @@
       "tried": "trial of round 1: install, build, test, control",
       "observed": "reached build_and_test, as claimed",
       "changed": null
+    },
+    {
+      "attempt": 7,
+      "tried": "Amendment. Read amend.json — one report, from the owner: the coverage gate reports no coverage report on every PR so diff coverage is never measured, and the static gate may be checking nothing. Rather than guess at what the gates read, unpacked .factory/bin/runner.tgz and read the consuming code: readCoverage/fromLcov, diffCoverage, runCoverageGate, runStaticTools, runSarifCheck, countSarif, runTestsGate, closedEnv/shellBase, and the trial's checks loop.",
+      "observed": "Four facts settled the design. (1) `bsf gates coverage` only *reads* the report; it is `bsf gates tests` that runs `commands.build && commands.coverage`, and only because factory.yaml has `existing_ci.test_check: null` — with a test_check set it would short-circuit on ci.yml's result and never write a report. (2) fromLcov reads only SF/LF/LH per record, and diffCoverage sums whole-file covered/total over the changed files, so per-file totals are what matter and a changed file absent from the report yields `null` diff coverage, which the gate then treats as 100%. (3) runStaticTools already runs `go vet` natively whenever go.mod exists, so the static gate was *not* checking nothing here — declaring go vet again would double-count the same findings. (4) A declared static check is judged only on whether its SARIF exists and parses, and the trial silently drops one that does not, so the command must write a valid SARIF even when it finds nothing.",
+      "changed": "Scoped the amendment: add commands.coverage + coverage_report, and add exactly one static check — a Go checker the factory does not already run. Kept every existing command, the tier, the empty env/services/stubs and the egress list untouched."
+    },
+    {
+      "attempt": 8,
+      "tried": "Built the coverage command. First tried the obvious `go test -coverprofile=... ./...`, then compared it with `-coverpkg=./...`. Converted Go's coverprofile to lcov with an awk program embedded in the command itself, because nothing written into the repo during setup is kept, so the command has to be self-contained. Ran the whole thing under the closed environment (PATH, HOME, TMPDIR, LANG, CI only).",
+      "observed": "Without -coverpkg the profile contains only internal/tally/tally.go, because cmd/tally has no test binary of its own — so a PR touching cmd/tally/main.go would have hit diffCoverage's `total === 0` path, scored `null`, and been waved through at 100%. With `-coverpkg=./...` both files appear: internal/tally/tally.go 35/40 lines and cmd/tally/main.go 0/18, 60.3% overall. The awk converter emits TN/SF/DA/LF/LH/end_of_record with repo-relative paths (the module path from `go list -m` is stripped off the profile's import-path-qualified names, which is what fromLcov's rel() needs). Exit 0, no network.",
+      "changed": "Set commands.coverage to `go vet ./... && mkdir -p coverage && go test -covermode=count -coverpkg=./... -coverprofile=coverage/cover.out ./... && awk ... > coverage/lcov.info`, and coverage_report to coverage/lcov.info as lcov. `go vet` is kept at the front so the tests gate, which runs this command *instead of* commands.test, stays exactly as strict as commands.test is."
+    },
+    {
+      "attempt": 9,
+      "tried": "Chose and proved the static check. Compared .factory/rules/go.yaml's four tools against what runStaticTools already runs: go-vet is native to the factory, gitleaks runs as a pinned action in CI and needs .gitleaks.toml (absent), staticcheck's detect list is .golangci.yml / .golangci.yaml / staticcheck.conf (all absent), gofmt's detect is go.mod alone and nothing in the factory runs it. Wrote a gofmt-to-SARIF command and tested it both ways: on the tree as it stands, and with a deliberately mangled scratch file at internal/tally/zz_scratch_bad.go (`func  scratchBad( x int )int {` with an unindented body).",
+      "observed": "On the clean tree the command exits 0 and writes SARIF with an empty `results` array — which countSarif parses happily, so the check stays available rather than being dropped. With the scratch file present it writes exactly one result, ruleId `gofmt`, uri `internal/tally/zz_scratch_bad.go`, startLine 1. Deleted the scratch file; `git status` showed nothing left behind in the source tree.",
+      "changed": "Added the single static check `gofmt`, writing .bsf-reports/gofmt.sarif. Recorded under dropped why staticcheck was considered and left out."
+    },
+    {
+      "attempt": 10,
+      "tried": "Validated the amended manifest with `.factory/bin/bsf sandbox check --file /tmp/gh-aw/agent/bsf/setup/manifest.json`, then ran the real trial locally with `.factory/bin/bsf sandbox trial --candidate ... --out ...` so the coverage and static checks were judged by the same code the runner uses, not by inspection.",
+      "observed": "`sandbox check` printed \"valid sandbox manifest, tier build_and_test\", exit 0. The local trial ran install, build, test and the empty-directory control (all ok, control confirming the commands depend on this repo's code), then judged both new checks with the runner's own code: coverage ok — \"lcov report at coverage/lcov.info: 2 file(s), 60.3% of lines\"; static ok — \"SARIF at .bsf-reports/gofmt.sarif: 0 finding(s) across 0 rule(s)\". Zero findings is the right answer on a tree that is already formatted, and it is an *available* check rather than a dropped one, which is what the trial distinguishes. Reached build_and_test, as claimed.",
+      "changed": "Nothing. Removed the coverage/, .bsf-reports/ and ./tally artifacts the trial left in the working tree."
+    },
+    {
+      "attempt": 11,
+      "tried": "trial of round 1: install, build, test, control",
+      "observed": "reached build_and_test, as claimed",
+      "changed": null
     }
   ],
-  "frozen_at": "2026-11-21T05:33:13.958Z"
+  "frozen_at": "2026-11-21T10:00:24.325Z"
 }
