@@ -1,0 +1,62 @@
+{
+  "role": "verifier",
+  "attempt": 1,
+  "report": {
+    "schema": "pr-report/1",
+    "summary": [
+      "Checked all 4 acceptance checks by running the built ./tally binary: the dash-project line is rejected on stdin and as a file argument with exit 1; valid timesheets, including my-site, still total wi…",
+      "Before the fix the same input printed a '-' row and exited 0; after the fix it is rejected at line 2."
+    ],
+    "blocks": [
+      {
+        "type": "file",
+        "file": "before-dash-stdin.txt",
+        "caption": "Before the fix (parent 1436e4a): '2026-11-20 - 45m' is totalled as a project named '-' and the exit status is 0"
+      },
+      {
+        "type": "file",
+        "file": "check1-stdin.txt",
+        "caption": "Acceptance check 1: on stdin, the dash-project line prints nothing on stdout, 'tally: line 2: \"-\" is not a project name like site' on stderr, and exits 1"
+      },
+      {
+        "type": "file",
+        "file": "check2-file.txt",
+        "caption": "Acceptance check 2: the same two lines given as a file argument print the same stderr message and exit 1"
+      },
+      {
+        "type": "file",
+        "file": "check3-valid.txt",
+        "caption": "Acceptance check 3: a valid timesheet with my-site still totals (site 1h30m, my-site 0h45m) and exits 0, via stdin and via a file"
+      },
+      {
+        "type": "file",
+        "file": "check4-tests.txt",
+        "caption": "Acceptance check 4: go vet ./... passes and go test ./... passes, including the new dash test; the same test fails against the pre-fix tally.go"
+      },
+      {
+        "type": "file",
+        "file": "edge-cases.txt",
+        "caption": "Edge cases: --project my-site still works, a dash on line 1 is rejected as line 1, and a normal site line still totals"
+      },
+      {
+        "type": "diagram",
+        "title": "What each check exercised",
+        "mermaid": "flowchart LR\n  A[stdin or file] --> B[tally.Parse]\n  B -->|project is '-'| C[error: line N, exit 1]\n  B -->|valid| D[Totals, exit 0]"
+      }
+    ]
+  },
+  "media_commit": "6c1b6196de625d6733d4bac3a372240c9fa17b16",
+  "media_prefix": "reports/wi_01M801NDVB1TZJ29GF6MT0VSKJ/verifier-1",
+  "inline": {
+    "before-dash-stdin.txt": "Before the fix (parent 1436e4a built separately). Command: printf '2026-11-20 site 1h30m\\n2026-11-20 - 45m\\n' | tally-before\nstdout:\nsite                 1h30m\n-                    0h45m\nstderr (bytes): 0\nexit=0\n",
+    "check1-stdin.txt": "Acceptance check 1 (stdin). Command: printf '2026-11-20 site 1h30m\\n2026-11-20 - 45m\\n' | ./tally\nstdout (bytes): 0\nstderr:\ntally: line 2: \"-\" is not a project name like site\nexit=1\n",
+    "check2-file.txt": "Acceptance check 2 (file argument). Command: ./tally bad-dash.txt (lines: '2026-11-20 site 1h30m', '2026-11-20 - 45m')\nstdout (bytes): 0\nstderr:\ntally: line 2: \"-\" is not a project name like site\nexit=1\n",
+    "check3-valid.txt": "Acceptance check 3 (valid timesheet still totals). Command: printf '2026-11-20 site 1h30m\\n2026-11-20 my-site 45m\\n' | ./tally\nstdout:\nsite                 1h30m\nmy-site              0h45m\nstderr (bytes): 0\nexit=0\n\nSame input via file argument:\nsite                 1h30m\nmy-site              0h45m\nexit=0\n",
+    "check4-tests.txt": "Check 4: go vet ./... && go test ./...\nvet: ok\nok  \tgithub.com/bsf-fixtures/go-cli/cmd/tally\t(cached)\nok  \tgithub.com/bsf-fixtures/go-cli/internal/tally\t(cached)\n--- new test against pre-fix tally.go (1436e4a), expected FAIL:\n--- FAIL: TestParseRejectsADashProjectAndNamesItsLine (0.00s)\n    tally_test.go:60: got <nil>\nFAIL\nFAIL\tgithub.com/bsf-fixtures/go-cli/internal/tally\t0.003s\nFAIL\ngo test exit=1\n",
+    "edge-cases.txt": "Edge cases after the fix:\nmy-site              0h45m\nexit=0\ntally: line 1: \"-\" is not a project name like site\nexit=1\nsite                 1h00m\nexit=0\n"
+  },
+  "problems": [
+    "summary line 1 was shortened to fit (234 → 200)"
+  ],
+  "stored_at": "2026-11-21T22:39:32.083Z"
+}
