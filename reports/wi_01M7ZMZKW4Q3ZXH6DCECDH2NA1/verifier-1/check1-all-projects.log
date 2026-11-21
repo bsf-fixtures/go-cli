@@ -1,0 +1,9 @@
+command: go build -o tally ./cmd/tally && printf '2026-11-20 site 1h30m\n2026-11-20 docs 45m\n# note\n2026-11-21 site 2h\n' | ./tally
+exit: 0
+stdout:
+site                 3h30m
+docs                 0h45m
+total                4h15m
+stderr: (empty)
+diff vs expected (site 3h30m / docs 0h45m / total 4h15m):
+MATCH

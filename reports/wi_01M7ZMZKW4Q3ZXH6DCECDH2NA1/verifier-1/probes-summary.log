@@ -1,0 +1,5 @@
+Extra probes (not acceptance checks):
+- empty stdin -> prints only 'total 0h00m', exit 0
+- comments-only -> prints only 'total 0h00m', exit 0
+- --project docs -> one line 'docs 0h45m', no total, exit 0
+- file argument with same timesheet -> same three lines as check 1, exit 0
