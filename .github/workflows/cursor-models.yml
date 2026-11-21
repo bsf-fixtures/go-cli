@@ -1,0 +1,15 @@
+# One-off probe for the Cursor cap test: which models this CURSOR_API_KEY may use.
+name: cursor-models
+on: workflow_dispatch
+permissions: {}
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+        run: |
+          curl -sS https://api.cursor.com/v0/models -u "$CURSOR_API_KEY:" | tee models.json
+          curl -fsSL https://cursor.com/install | bash >/dev/null 2>&1 || true
+          export PATH="$HOME/.local/bin:$PATH"
+          agent --list-models 2>&1 | head -80 || cursor-agent --list-models 2>&1 | head -80
