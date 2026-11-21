@@ -44,13 +44,12 @@ github-app:
   client-id: ${{ vars.FACTORY_APP_CLIENT_ID }}
   private-key: ${{ secrets.FACTORY_APP_PRIVATE_KEY }}
 
+# Derived by runner/scripts/harness-variants.mjs for the cursor engine.
 engine:
-  id: claude
+  id: cursor
   model: ${{ inputs.model }}
-  env:
-    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-    # The spec is where reasoning pays; past this it mostly costs.
-    MAX_THINKING_TOKENS: "8000"
+imports:
+  - shared/cursor.md
 
 permissions:
   contents: read
@@ -116,6 +115,8 @@ safe-outputs:
       id: claude
       model: claude-haiku-5-5
       max-turns: 3
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     max-ai-credits: 50
 
 pre-agent-steps:
@@ -193,7 +194,7 @@ post-steps:
       ROLE: spec
       ATTEMPT: ${{ inputs.attempt }}
       MODEL: ${{ inputs.model }}
-    run: bsf step-report --role "$ROLE" --attempt "$ATTEMPT" --model "$MODEL" --out /tmp/gh-aw/agent/bsf/step-report.json
+    run: bsf step-report --harness cursor-cli --role "$ROLE" --attempt "$ATTEMPT" --model "$MODEL" --out /tmp/gh-aw/agent/bsf/step-report.json
   # The run record is made from these: model, tokens and cost for each role.
   - name: Upload the StepReport
     if: always()

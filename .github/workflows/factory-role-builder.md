@@ -65,11 +65,12 @@ github-app:
   client-id: ${{ vars.FACTORY_APP_CLIENT_ID }}
   private-key: ${{ secrets.FACTORY_APP_PRIVATE_KEY }}
 
+# Derived by runner/scripts/harness-variants.mjs for the cursor engine.
 engine:
-  id: claude
+  id: cursor
   model: ${{ inputs.model }}
-  env:
-    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+imports:
+  - shared/cursor.md
 
 permissions:
   contents: read
@@ -147,6 +148,8 @@ safe-outputs:
       id: claude
       model: claude-haiku-5-5
       max-turns: 3
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     max-ai-credits: 50
   # No upload-artifact safe output here: with create-pull-request beside it,
   # gh-aw 1.2 and 1.3 put the PR checkout ahead of the App token it reads, and
@@ -265,7 +268,7 @@ post-steps:
       ROLE: builder
       ATTEMPT: ${{ inputs.attempt }}
       MODEL: ${{ inputs.model }}
-    run: bsf step-report --role "$ROLE" --attempt "$ATTEMPT" --model "$MODEL" --out /tmp/gh-aw/agent/bsf/step-report.json
+    run: bsf step-report --harness cursor-cli --role "$ROLE" --attempt "$ATTEMPT" --model "$MODEL" --out /tmp/gh-aw/agent/bsf/step-report.json
   - name: Upload the StepReport
     uses: actions/upload-artifact@v4
     with:
