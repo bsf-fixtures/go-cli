@@ -1,0 +1,37 @@
+{
+  "schema": "pr-report/1",
+  "summary": [
+    "Verdict: pass. Both acceptance checks matched exact stdout and exit 0 on the built ./tally binary.",
+    "Without --project: site 3h30m, docs 0h45m, then total 4h15m (three lines).",
+    "With --project site: only site 3h30m; the word total is absent."
+  ],
+  "blocks": [
+    {
+      "type": "file",
+      "file": "check1-all-projects.log",
+      "caption": "Acceptance check 1: no --project prints site, docs, then total 4h15m; exit 0; exact match"
+    },
+    {
+      "type": "file",
+      "file": "check2-project-flag.log",
+      "caption": "Acceptance check 2: --project site prints only site 3h30m with no total line; exit 0; exact match"
+    },
+    {
+      "type": "diagram",
+      "title": "What each check exercised",
+      "mermaid": "flowchart TD\n  build[go build -o tally] --> stdin[timesheet on stdin]\n  stdin --> all[./tally]\n  stdin --> one[\"./tally --project site\"]\n  all --> out1[\"site 3h30m / docs 0h45m / total 4h15m\"]\n  one --> out2[\"site 3h30m only\"]"
+    },
+    {
+      "type": "file",
+      "file": "probes-summary.log",
+      "caption": "Extra probes: file-arg matches check 1; --project docs stays single-line; empty input still ends with a total line"
+    }
+  ],
+  "focus": [
+    {
+      "title": "Grand total only on the all-projects path",
+      "detail": "Ran the same timesheet with and without --project. The total line appears only when every project is printed.",
+      "files": ["cmd/tally/main.go", "internal/tally/tally.go"]
+    }
+  ]
+}
