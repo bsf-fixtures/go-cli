@@ -21,5 +21,62 @@
   "pr": null,
   "parent": null,
   "related": [],
-  "spec": null
+  "spec": {
+    "plan": "Before: `tally --version` is rejected by the flag set (\"flag provided but not defined: -version\", usage on stderr, exit 1). After: `tally --version` (and `-version`, which Go's flag package treats identically) prints exactly `tally 1.0.0` and a newline on stdout, writes nothing to stderr, and exits 0 without reading stdin or any file; every other invocation behaves exactly as today. Exact change in cmd/tally/main.go: (1) add a package-level `const version = \"1.0.0\"` with a one-sentence doc comment; (2) in `run`, register `showVersion := fs.Bool(\"version\", false, \"print the version and exit\")` next to the existing `project` flag; (3) immediately after the successful `fs.Parse(args)` block and before the stdin/file selection, add `if *showVersion { fmt.Fprintln(stdout, \"tally \"+version); return 0 }` so it wins over any positional path and never blocks on stdin; (4) add the line `//\ttally --version` to the usage examples in the package doc comment. No change to internal/tally (a version string is not timesheet logic), no new dependency, no ldflags/build-info machinery. Tests go in a NEW file cmd/tally/version_test.go (package main), so no existing test file is edited.",
+    "files": [
+      "cmd/tally/main.go",
+      "cmd/tally/version_test.go"
+    ],
+    "feature_folders": [
+      "cmd/tally/"
+    ],
+    "acceptance_checks": [
+      "After `go build -o tally ./cmd/tally`, running `./tally --version; echo \"exit=$?\"` prints exactly two lines: `tally 1.0.0` then `exit=0`.",
+      "Running `./tally --version 2>/tmp/gh-aw/agent/err.txt >/dev/null; wc -c < /tmp/gh-aw/agent/err.txt` prints `0` — nothing is written to stderr.",
+      "Running `./tally -version` (single dash) prints `tally 1.0.0` and exits 0, the same as `--version`.",
+      "Running `sleep 10 | timeout 5 ./tally --version; echo \"exit=$?\"` prints `tally 1.0.0` then `exit=0` immediately, proving --version does not wait on stdin.",
+      "Running `printf '2026-11-20 site ninety\\n' | ./tally --version; echo \"exit=$?\"` prints `tally 1.0.0` then `exit=0` — the timesheet is not parsed when --version is given.",
+      "Nothing else changes: `printf '2026-11-20 site 1h30m\\n2026-11-20 docs 45m\\n' | ./tally` still prints `site                 1h30m` then `docs                 0h45m` and exits 0, and `printf '2026-11-20 site 1h30m\\n2026-11-20 docs 45m\\n' | ./tally --project docs` still prints only `docs                 0h45m`.",
+      "`go vet ./... && go test ./...` passes, and `gofmt -l .` prints nothing."
+    ],
+    "tests_added": [
+      "cmd/tally/version_test.go: TestRunWithVersionFlagPrintsTheVersionAndExitsZero — calls run([]string{\"--version\"}, strings.NewReader(\"2026-11-20 site ninety\\n\"), &stdout, &stderr) and asserts code == 0, stdout == \"tally 1.0.0\\n\", stderr == \"\" (the malformed stdin proves the timesheet is not read), using t.Fatalf with the actual values interpolated as main_test.go does.",
+      "cmd/tally/version_test.go: TestRunWithVersionFlagIgnoresAMissingFile — calls run([]string{\"--version\", \"/nope.txt\"}, strings.NewReader(\"\"), &stdout, &stderr) and asserts code == 0 and stdout == \"tally 1.0.0\\n\", proving --version is answered before any file is opened."
+    ],
+    "tests_changed": [],
+    "research": [
+      {
+        "claim": "cmd/tally/main.go already parses arguments with a flag.FlagSet in ContinueOnError mode (the `--project` flag) inside a testable `run(args, stdin, stdout, stderr) int`; an unknown flag currently returns 1. A `version` bool flag fits this existing pattern with no new surface type.",
+        "source": "cmd/tally/main.go:23"
+      },
+      {
+        "claim": "Go's flag package accepts `--version`, `-version` and `--version=true` identically for a Bool flag; flags after the first positional argument are not parsed (`x --version` leaves version false), which is existing flag behaviour and not changed by this plan.",
+        "source": "ran: in /tmp/gh-aw/agent/exp a FlagSet with fs.Bool(\"version\",...) run via `go run main.go --version`, `-version`, `--version=true x`, `x --version` printed true,true,true,false"
+      },
+      {
+        "claim": "Go flag syntax: one or two dashes are equivalent; boolean flags may be given without a value.",
+        "source": "https://pkg.go.dev/flag ‘Command line flag syntax’"
+      },
+      {
+        "claim": "Existing cmd tests are in cmd/tally/main_test.go and call run() with bytes.Buffer stdout/stderr and strings.NewReader stdin, asserting with t.Fatalf and sentence-style names; the new test file follows the same shape so main_test.go is not edited.",
+        "source": "cmd/tally/main_test.go"
+      },
+      {
+        "claim": "Logic about timesheet content belongs in internal/tally and main stays thin; output goes to stdout, diagnostics to stderr, failure exits non-zero. A version string is wiring, not timesheet logic, so it stays in cmd/tally.",
+        "source": ".factory/definition/context/fundamentals.md ‘Taste’ and ‘Product intent’"
+      },
+      {
+        "claim": "Changing cmd/tally/main.go requires tests alongside it: the coverage gate requires 80% diff coverage and the manifest instruments cmd/tally with -coverpkg=./...",
+        "source": ".factory/guardrails/coverage.json"
+      },
+      {
+        "claim": "The sandbox can build the binary, run it on stdin/arguments, read stdout/stderr and exit status, and run go vet/go test/gofmt — every acceptance check is one of these.",
+        "source": ".factory/sandbox/manifest.json capabilities.exercised"
+      },
+      {
+        "claim": "product_work may change code and tests only; cmd/tally/ is not a protected path and no practices are recorded that bear on this change.",
+        "source": ".factory/definition/policy.yaml"
+      }
+    ]
+  }
 }
