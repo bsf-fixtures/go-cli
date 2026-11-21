@@ -1,0 +1,21 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: go test ./...
+      - name: The binary totals a timesheet
+        run: |
+          out=$(printf '2026-11-20 site 1h30m\n2026-11-20 docs 45m\n' | go run ./cmd/tally)
+          echo "$out"
+          echo "$out" | grep -q '^site *1h30m$'
