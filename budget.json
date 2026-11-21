@@ -5,7 +5,17 @@
     "unknown": 0.155,
     "product_work": 4.8677
   },
-  "inflight": [],
+  "inflight": [
+    {
+      "key": "44954353265-1-build",
+      "pipeline": "product_work",
+      "role": "builder",
+      "model": "claude-sonnet-5-5",
+      "agent_ceiling_usd": 5.32,
+      "detection_ceiling_usd": 0.83,
+      "started_at": "2026-11-21T22:13:16.534Z"
+    }
+  ],
   "settled": [
     "44951031834-1-triage",
     "44951424102-1-triage",
@@ -18,5 +28,5 @@
     "44954353265-1-triage",
     "44954353265-1-spec"
   ],
-  "updated_at": "2026-11-21T22:11:35.813Z"
+  "updated_at": "2026-11-21T22:13:16.534Z"
 }
