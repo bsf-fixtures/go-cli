@@ -1,0 +1,16 @@
+{
+  "schema": "pr-report/1",
+  "summary": [
+    "Checked all 4 acceptance checks by running the built ./tally binary: the dash-project line is rejected on stdin and as a file argument with exit 1; valid timesheets, including my-site, still total with exit 0; go vet and go test pass.",
+    "Before the fix the same input printed a '-' row and exited 0; after the fix it is rejected at line 2."
+  ],
+  "blocks": [
+    { "type": "file", "file": "before-dash-stdin.txt", "caption": "Before the fix (parent 1436e4a): '2026-11-20 - 45m' is totalled as a project named '-' and the exit status is 0" },
+    { "type": "file", "file": "check1-stdin.txt", "caption": "Acceptance check 1: on stdin, the dash-project line prints nothing on stdout, 'tally: line 2: \"-\" is not a project name like site' on stderr, and exits 1" },
+    { "type": "file", "file": "check2-file.txt", "caption": "Acceptance check 2: the same two lines given as a file argument print the same stderr message and exit 1" },
+    { "type": "file", "file": "check3-valid.txt", "caption": "Acceptance check 3: a valid timesheet with my-site still totals (site 1h30m, my-site 0h45m) and exits 0, via stdin and via a file" },
+    { "type": "file", "file": "check4-tests.txt", "caption": "Acceptance check 4: go vet ./... passes and go test ./... passes, including the new dash test; the same test fails against the pre-fix tally.go" },
+    { "type": "file", "file": "edge-cases.txt", "caption": "Edge cases: --project my-site still works, a dash on line 1 is rejected as line 1, and a normal site line still totals" },
+    { "type": "diagram", "title": "What each check exercised", "mermaid": "flowchart LR\n  A[stdin or file] --> B[tally.Parse]\n  B -->|project is '-'| C[error: line N, exit 1]\n  B -->|valid| D[Totals, exit 0]" }
+  ]
+}
