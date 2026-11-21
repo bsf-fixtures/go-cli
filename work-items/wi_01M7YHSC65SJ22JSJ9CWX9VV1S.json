@@ -21,5 +21,103 @@
   "pr": null,
   "parent": null,
   "related": [],
-  "spec": null
+  "spec": {
+    "plan": "Today `tally` always prints every project: `cmd/tally/main.go` reads `os.Args[1]` as an optional file path, calls `tally.Parse`, and prints one `%-20s %s` line per entry of `tally.Totals`. After this change, `tally --project NAME` prints exactly one line — NAME in the same `%-20s` column followed by `tally.Format` of that project's minutes — and a project with no matching entries prints `0h00m` instead of nothing; with no flag the output is byte-for-byte what it is today. The selection logic goes in `internal/tally` as a new exported `ProjectTotal(entries []Entry, project string) Total` that sums the matching entries and returns `Total{Project: project, Minutes: 0}` when none match, so `cmd/tally/main.go` stays wiring only (fundamentals.md, \"Keep `main` thin\"). Decisions the builder does not have to make: use the standard-library `flag` package via `flag.NewFlagSet(\"tally\", flag.ContinueOnError)` with `fs.SetOutput(os.Stderr)` and a single `fs.String(\"project\", \"\", ...)`, parsed from `os.Args[1:]` — no new dependency, and `flag` accepts `--project NAME`, `-project NAME` and `--project=NAME` alike (verified, see research); the flag is treated as set when its value is a non-empty string, so `--project=\"\"` behaves as no flag; matching on project name is exact and case-sensitive, as `Totals`' map keying already is; the positional file path is `fs.Arg(0)` and any further positional arguments are ignored, exactly as `os.Args[1]` ignores them today; `Parse` still reads the whole timesheet when `--project` is given, so a malformed line anywhere is still the `tally: line N: …` error and exit 1, never a filtered zero (fundamentals.md, \"Product intent\"); on a `fs.Parse` error the builder exits 1 without printing a second message, because `flag` has already written its own message and usage to stderr. `flag` stops parsing at the first non-flag argument, so `tally --project site sheet.txt` works and `tally sheet.txt --project site` does not — that is stock `flag` behaviour and is left as is rather than hand-rolled. Because `cmd/tally` has no test file and reports 0.0% of statements, the changed lines in `main.go` have nothing to count against the 80% diff-coverage floor (coverage.json `diff_min_pct`, runbook.md Test); so `main.go` is reshaped into `func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int` with `func main() { os.Exit(run(os.Args[1:], os.Stdin, os.Stdout, os.Stderr)) }`, and a new `cmd/tally/main_test.go` covers `run`. That reshape is the minimum needed to make the new argument handling testable at all, not a general refactor. Nothing else is folded in: the README and the package doc comments beyond `cmd/tally/main.go`'s own usage block are untouched, and no second way of configuring the tool is introduced.",
+    "files": [
+      "cmd/tally/main.go",
+      "cmd/tally/main_test.go",
+      "internal/tally/tally.go",
+      "internal/tally/tally_test.go"
+    ],
+    "feature_folders": [
+      "cmd/tally",
+      "internal/tally"
+    ],
+    "acceptance_checks": [
+      "Build with `go build ./... && go build -o tally ./cmd/tally`, then run `printf '2026-11-20 site 1h30m\\n2026-11-20 docs 45m\\n2026-11-21 site 2h\\n' | ./tally --project site`. Stdout is exactly one line, `site` left-padded into a 20-character column followed by a space and `3h30m`; the word `docs` does not appear anywhere in the output; exit status is 0.",
+      "Run `printf '2026-11-20 site 1h30m\\n2026-11-20 docs 45m\\n' | ./tally --project nope`. Stdout is exactly one line, `nope` in the same 20-character column followed by `0h00m` — not empty output and not an error; exit status is 0.",
+      "Run the runbook's first Verify command unchanged — `printf '2026-11-20 site 1h30m\\n2026-11-20 docs 45m\\n# note\\n2026-11-21 site 2h\\n' | ./tally` — with no flag. Stdout is still the two lines `site                 3h30m` then `docs                 0h45m`, in that order, and exit status is 0. Also confirm the CI smoke check still passes: `printf '2026-11-20 site 1h30m\\n2026-11-20 docs 45m\\n' | go run ./cmd/tally | grep -q '^site *1h30m$'` exits 0.",
+      "Write a timesheet to a file and pass both the flag and the path: `printf '2026-11-20 site 1h30m\\n2026-11-20 docs 45m\\n' > /tmp/ts.txt && ./tally --project docs /tmp/ts.txt`. Stdout is the single line `docs` + `0h45m` in the 20-character column, exit status 0 — the flag works on the file route as well as on stdin.",
+      "Run `printf '2026-11-20 site 1h\\n2026-11-21 docs ninety\\n' | ./tally --project site; echo \"exit=$?\"`. Stdout is empty, stderr is `tally: line 2: \"ninety\" is not a positive duration like 1h30m`, and the exit status is 1 — naming a project does not suppress a malformed line in a different project.",
+      "Run `go vet ./... && go test ./...`; both succeed. Then run `go test ./... -cover` and confirm `cmd/tally` reports a coverage percentage above 80.0% of statements instead of `[no test files]`."
+    ],
+    "tests_added": [
+      "internal/tally/tally_test.go — `TestProjectTotalSumsOnlyTheNamedProject`: `ProjectTotal` over entries for two projects returns a `Total` whose `Project` is the named one and whose `Minutes` is the sum of only that project's entries.",
+      "internal/tally/tally_test.go — `TestProjectTotalIsZeroForAProjectWithNoEntries`: `ProjectTotal` for a name that appears in no entry returns `Total{Project: name, Minutes: 0}` rather than an empty or absent value, so the caller can render `0h00m`.",
+      "cmd/tally/main_test.go — `TestRunWithProjectFlagPrintsOnlyThatProject`: `run([]string{\"--project\", \"site\"}, …)` over a two-project timesheet on the stdin reader writes exactly one line naming `site` with its total, writes nothing about `docs`, and returns 0.",
+      "cmd/tally/main_test.go — `TestRunPrintsZeroForAProjectWithNoEntries`: `run([]string{\"--project\", \"nope\"}, …)` writes one line `nope` with `0h00m` and returns 0.",
+      "cmd/tally/main_test.go — `TestRunWithoutProjectFlagPrintsEveryProjectLargestFirst`: `run(nil, …)` over the same timesheet writes both project lines in the existing `%-20s` column, largest first, and returns 0.",
+      "cmd/tally/main_test.go — `TestRunReportsAMalformedLineOnStderrAndExitsOne`: `run` over a timesheet with a bad duration writes nothing to stdout, writes a stderr line containing `tally:` and `line 2`, and returns 1 — both with and without `--project`.",
+      "cmd/tally/main_test.go — `TestRunReadsTheFileNamedByThePositionalArgument`: `run([]string{path}, …)` with a timesheet written to a `t.TempDir()` file totals that file rather than stdin, and `run([]string{\"/nope.txt\"}, …)` writes a `tally: open …` line to stderr and returns 1."
+    ],
+    "tests_changed": [
+      "internal/tally/tally_test.go"
+    ],
+    "research": [
+      {
+        "source": "cmd/tally/main.go:15",
+        "claim": "The program has no flag surface at all today: `cmd/tally/main.go` treats `os.Args[1]`, if present, as the timesheet path and otherwise reads `os.Stdin`. There is no `flag` import anywhere, so `--project` is a genuinely new argument surface and the whole of argument handling lives in these ten lines."
+      },
+      {
+        "source": "internal/tally/tally.go:59",
+        "claim": "`Totals` builds a `map[string]int` keyed on `Entry.Project` and emits one `Total` per key, so a project with no entries simply has no row — which is why `--project` for an unknown name needs its own function rather than a filter over `Totals`' output. Project names are compared as exact strings, so the new lookup is exact and case-sensitive for consistency."
+      },
+      {
+        "source": "internal/tally/tally.go:78",
+        "claim": "`Format(0)` renders `0h00m`: it is `fmt.Sprintf(\"%dh%02dm\", minutes/60, minutes%60)`, so the empty-project output the request asks for falls out of the existing formatter with no special case and no change to `Format`."
+      },
+      {
+        "source": "cmd/tally/main.go:32 — printed with `fmt.Printf(\"%-20s %s\\n\", t.Project, tally.Format(t.Minutes))`; the rule is stated under \"Keep the output columnar\" in .factory/definition/context/fundamentals.md",
+        "claim": "The output column is `%-20s %s` and fundamentals records that `%-20s` and the zero-padded `%dh%02dm` exist so a human can read a column of totals, and that changing either breaks every script that greps this output including ci.yml. The single-project line therefore uses the same format string rather than a bare value."
+      },
+      {
+        "source": ".factory/definition/context/fundamentals.md — \"Where logic lives\" in Dominant patterns, and \"Keep `main` thin\" under Taste",
+        "claim": "Fundamentals requires logic to live in `internal/tally` as functions over plain slices so they are testable without a process, and says explicitly that a loop or condition about timesheet content in `cmd/tally/main.go` belongs in `internal/tally`. Selecting one project's minutes is a condition about timesheet content, so `ProjectTotal` goes in the package and `main` only prints its result."
+      },
+      {
+        "source": ".factory/definition/context/fundamentals.md — \"Prefer extending `Parse`'s vocabulary over adding a flag\" and \"No dependency without an argument for it\" under Taste",
+        "claim": "Fundamentals warns that a command-line option is a new surface with no precedent here and should be a deliberate decision rather than a default way to make something configurable. The work item asks for `--project NAME` by name, so the deliberate decision is made by the request; the plan adds exactly one flag and no general configuration surface, and uses the standard library's `flag` rather than a dependency, which the same file's \"No dependency without an argument for it\" requires."
+      },
+      {
+        "source": "ran: cd /tmp/gh-aw/agent/scratch/flagexp && go run main.go — a FlagSet with ContinueOnError and one `project` string flag, run over eight argument vectors; output confirmed each case above",
+        "claim": "Go's `flag` package accepts one and two leading dashes identically and supports both `--project NAME` and `--project=NAME`; `Parse` stops at the first non-flag argument, so `--project site f.txt` yields project=\"site\" with `f.txt` left in `Args()`, while `f.txt --project site` yields project=\"\" and three positional arguments. An undefined flag or a missing value makes `ContinueOnError` print the message and usage to the FlagSet's output and return a non-nil error rather than exiting the process."
+      },
+      {
+        "source": "https://pkg.go.dev/flag — package overview (\"Command line flag syntax\") and the `ErrorHandling` constants",
+        "claim": "Standard library confirmation of the same rules: \"Flag parsing stops just before the first non-flag argument\", one or two minus signs are equivalent, and `ContinueOnError` returns the error from `Parse` instead of exiting. This is the documentation for the toolchain in use."
+      },
+      {
+        "source": "ran: go test ./... -cover — prints `github.com/bsf-fixtures/go-cli/cmd/tally\tcoverage: 0.0% of statements` and `internal/tally ... 90.0%`; the floor is `diff_min_pct: 80` in .factory/guardrails/coverage.json",
+        "claim": "`cmd/tally` has no test file and `go test ./... -cover` reports 0.0% of statements for it against 90.0% for `internal/tally`, while the coverage guardrail sets `diff_min_pct` to 80. Changed lines in `main.go` therefore have nothing to count unless a test file is added, which is why `run(args, stdin, stdout, stderr) int` is extracted and `cmd/tally/main_test.go` is created."
+      },
+      {
+        "source": ".factory/sandbox/manifest.json — `capabilities.exercised` and the `cmd/tally/main.go` entry in `capabilities.not_exercised`",
+        "claim": "The sandbox manifest records this gap as a known limitation and states that a change to cmd/tally needing a coverage number has nothing to count and will need a test added alongside it. It also confirms verification here can build the module, run `go vet`/`go test`, and run the built binary on stdin and on a file argument while reading stdout, stderr and exit status — which is exactly what every acceptance check above requires, and nothing more."
+      },
+      {
+        "source": ".factory/definition/context/fundamentals.md — \"Product intent\"; the pinned behaviour is Verify step 2 in .factory/definition/context/runbook.md",
+        "claim": "The product intent is that a total which is quietly wrong is worse than no total at all, and the runbook pins the malformed-line behaviour as the thing a change must not regress. `--project` must therefore not become a way to skip validation: `Parse` still reads the whole reader before `ProjectTotal` selects from it, so a bad line in an unrelated project still fails loudly."
+      },
+      {
+        "source": ".github/workflows/ci.yml — the \"The binary totals a timesheet\" step; `.github/workflows/**` is listed under `paths.protected` in .factory/definition/policy.yaml",
+        "claim": "`.github/workflows/ci.yml` pipes a two-entry timesheet through `go run ./cmd/tally` with no arguments and greps for `^site *1h30m$`, and the workflow directory is protected by policy so the check cannot be adjusted. The no-flag path must stay byte-identical, which is why one acceptance check re-runs that exact grep."
+      },
+      {
+        "source": "internal/tally/tally_test.go:18 — `TestParseNamesTheMalformedLineInsteadOfCountingZero`; the convention is recorded under \"Test naming\" and \"How a test asserts\" in .factory/definition/context/fundamentals.md",
+        "claim": "Test names in this repo are the sentence the test proves rather than the function called, assertions are `t.Fatalf` with the actual value interpolated, and there is no assertion library or table unless the cases genuinely vary. The four existing tests all follow this, and the new tests above are named the same way."
+      },
+      {
+        "source": ".factory/definition/context/feature-map.md — the Feature folders table and \"Where things go\"",
+        "claim": "The feature map puts the whole domain in `internal/tally` and the executable in `cmd/tally`, with the import edge running one way, and says no shared folder exists or should be created for a first use. Two feature folders is therefore the correct and minimal blast radius for this change; nothing new is created under `internal/`."
+      },
+      {
+        "source": ".factory/definition/policy.yaml:52 — `pipelines.product_work.may_change: [code, tests]`, against `paths.protected`",
+        "claim": "The `product_work` pipeline may change `code` and `tests` only. All four files in this plan are Go source or Go test files in the two feature folders; none is under `.factory/`, `.github/`, or any other protected path, and no guardrail or baseline is touched."
+      },
+      {
+        "source": ".factory/definition/context/practices.md:17",
+        "claim": "Practices is empty — the table under the heading has no rows — so there is no owner-stated practice for this plan to contradict or to satisfy beyond fundamentals and the guardrails."
+      }
+    ]
+  }
 }
