@@ -1,6 +1,6 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-21T21:27:20.275Z",
+  "updated_at": "2026-11-21T21:27:48.873Z",
   "open": [
     {
       "work_item": "wi_01M7Z7DACK3FBVDMX3XHEWT52Z",
@@ -42,7 +42,7 @@
     {
       "work_item": "wi_01M8003BYK5DRPC06E9WFJT18W",
       "pipeline": "product_work",
-      "status": "queued",
+      "status": "running",
       "fingerprint": "sha256:8e7ab33f7be929329052cd3b595ebb3921d88a25ddc0f2dc3469439e004a2022",
       "priority": "normal",
       "created_at": "2026-11-21T21:27:20.275Z",
