@@ -1,6 +1,6 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-21T08:12:53.265Z",
+  "updated_at": "2026-11-21T08:21:06.879Z",
   "open": [
     {
       "work_item": "wi_01M7YHSC65SJ22JSJ9CWX9VV1S",
@@ -9,7 +9,8 @@
       "fingerprint": "sha256:99393875410821c8de5347fdb727dfc485ac65cb69e37de22c26d820120db0ea",
       "priority": "normal",
       "created_at": "2026-11-21T07:57:58.341Z",
-      "source_ref": "#14"
+      "source_ref": "#14",
+      "pr": 15
     }
   ],
   "recent": [],
