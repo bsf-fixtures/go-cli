@@ -5,7 +5,17 @@
     "unknown": 0.155,
     "product_work": 4.1017
   },
-  "inflight": [],
+  "inflight": [
+    {
+      "key": "44954353265-1-triage",
+      "pipeline": "product_work",
+      "role": "triage",
+      "model": "claude-haiku-5-5",
+      "agent_ceiling_usd": 0.63,
+      "detection_ceiling_usd": 0.83,
+      "started_at": "2026-11-21T22:01:24.589Z"
+    }
+  ],
   "settled": [
     "44951031834-1-triage",
     "44951424102-1-triage",
@@ -16,5 +26,5 @@
     "44953021647-1-build",
     "44953393500-1-build"
   ],
-  "updated_at": "2026-11-21T21:52:02.602Z"
+  "updated_at": "2026-11-21T22:01:24.589Z"
 }
