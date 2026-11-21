@@ -1,0 +1,51 @@
+{
+  "role": "builder",
+  "attempt": 1,
+  "report": {
+    "schema": "pr-report/1",
+    "summary": [
+      "Without --project, tally now ends with a total line summing every project.",
+      "Why: a timesheet needs one billable/reportable grand total after the per-project rows.",
+      "What you notice: site and docs lines, then total 4h15m; --project site still prints only that project."
+    ],
+    "blocks": [
+      {
+        "type": "file",
+        "file": "files/acceptance.txt",
+        "caption": "Acceptance run: all-projects ends with total 4h15m; --project site has no total line"
+      },
+      {
+        "type": "diagram",
+        "title": "Where the grand total is printed",
+        "mermaid": "flowchart TD\n  parse[Parse timesheet] --> flag{--project set?}\n  flag -->|yes| one[ProjectTotal + print one line]\n  flag -->|no| many[Totals + print each project]\n  many --> grand[GrandTotal + print total line]\n  one --> done[exit 0]\n  grand --> done"
+      }
+    ],
+    "focus": [
+      {
+        "title": "GrandTotal lives in internal/tally",
+        "detail": "Summing stays out of main; GrandTotal returns Total{Project: \"total\", ...} so the same Fprintf as ProjectTotal works.",
+        "files": [
+          "internal/tally/tally.go",
+          "cmd/tally/main.go"
+        ]
+      },
+      {
+        "title": "--project omits the grand total",
+        "detail": "Only the all-projects branch appends the total line; the single-project path returns after one row.",
+        "files": [
+          "cmd/tally/main.go",
+          "cmd/tally/main_test.go"
+        ]
+      }
+    ],
+    "technical": "technical.md",
+    "conceptual": "conceptual.md"
+  },
+  "media_commit": "3a6b6086af5b5e99afba68146a9b5f2162c7a71b",
+  "media_prefix": "reports/wi_01M7ZMZKW4Q3ZXH6DCECDH2NA1/builder-1",
+  "inline": {
+    "files/acceptance.txt": "=== without --project ===\nsite                 3h30m\ndocs                 0h45m\ntotal                4h15m\nexit=0\n\n=== with --project site ===\nsite                 3h30m\nexit=0\n"
+  },
+  "problems": [],
+  "stored_at": "2026-11-21T18:28:52.699Z"
+}
