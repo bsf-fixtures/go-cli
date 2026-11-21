@@ -14,6 +14,15 @@
       "agent_ceiling_usd": 0.63,
       "detection_ceiling_usd": 0.83,
       "started_at": "2026-11-21T21:33:48.508Z"
+    },
+    {
+      "key": "44951641731-1-spec",
+      "pipeline": "product_work",
+      "role": "spec",
+      "model": "claude-opus-5-5",
+      "agent_ceiling_usd": 5.64,
+      "detection_ceiling_usd": 0.83,
+      "started_at": "2026-11-21T21:34:44.476Z"
     }
   ],
   "settled": [
@@ -21,5 +30,5 @@
     "44951424102-1-triage",
     "44951641731-1-triage"
   ],
-  "updated_at": "2026-11-21T21:33:48.508Z"
+  "updated_at": "2026-11-21T21:34:44.476Z"
 }
