@@ -218,7 +218,8 @@ post-steps:
       BUDGET_KEY: ${{ inputs.budget_key || format('{0}-{1}-triage-{2}', github.run_id, github.run_attempt, inputs.attempt) }}
       MODEL: ${{ inputs.model }}
       DETECTION_ARTIFACT: ${{ needs.activation.outputs.artifact_prefix }}detection
-    run: bsf budget measure --key "$BUDGET_KEY" --model "$MODEL" --detection-artifact "$DETECTION_ARTIFACT" --out /tmp/gh-aw/bsf-budget/measure.json
+      PIPELINE: ${{ inputs.pipeline }}
+    run: bsf budget measure --key "$BUDGET_KEY" --pipeline "$PIPELINE" --model "$MODEL" --detection-artifact "$DETECTION_ARTIFACT" --out /tmp/gh-aw/bsf-budget/measure.json
   - name: Upload the budget measure
     if: always()
     uses: actions/upload-artifact@v4
