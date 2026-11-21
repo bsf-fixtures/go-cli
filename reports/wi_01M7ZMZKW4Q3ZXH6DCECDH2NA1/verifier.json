@@ -1,0 +1,53 @@
+{
+  "role": "verifier",
+  "attempt": 1,
+  "report": {
+    "schema": "pr-report/1",
+    "summary": [
+      "Verdict: pass. Both acceptance checks matched exact stdout and exit 0 on the built ./tally binary.",
+      "Without --project: site 3h30m, docs 0h45m, then total 4h15m (three lines).",
+      "With --project site: only site 3h30m; the word total is absent."
+    ],
+    "blocks": [
+      {
+        "type": "file",
+        "file": "check1-all-projects.log",
+        "caption": "Acceptance check 1: no --project prints site, docs, then total 4h15m; exit 0; exact match"
+      },
+      {
+        "type": "file",
+        "file": "check2-project-flag.log",
+        "caption": "Acceptance check 2: --project site prints only site 3h30m with no total line; exit 0; exact match"
+      },
+      {
+        "type": "diagram",
+        "title": "What each check exercised",
+        "mermaid": "flowchart TD\n  build[go build -o tally] --> stdin[timesheet on stdin]\n  stdin --> all[./tally]\n  stdin --> one[\"./tally --project site\"]\n  all --> out1[\"site 3h30m / docs 0h45m / total 4h15m\"]\n  one --> out2[\"site 3h30m only\"]"
+      },
+      {
+        "type": "file",
+        "file": "probes-summary.log",
+        "caption": "Extra probes: file-arg matches check 1; --project docs stays single-line; empty input still ends with a total line"
+      }
+    ],
+    "focus": [
+      {
+        "title": "Grand total only on the all-projects path",
+        "detail": "Ran the same timesheet with and without --project. The total line appears only when every project is printed.",
+        "files": [
+          "cmd/tally/main.go",
+          "internal/tally/tally.go"
+        ]
+      }
+    ]
+  },
+  "media_commit": "e329ef682c35a4565737f530cc42af9a6ac245da",
+  "media_prefix": "reports/wi_01M7ZMZKW4Q3ZXH6DCECDH2NA1/verifier-1",
+  "inline": {
+    "check1-all-projects.log": "command: go build -o tally ./cmd/tally && printf '2026-11-20 site 1h30m\\n2026-11-20 docs 45m\\n# note\\n2026-11-21 site 2h\\n' | ./tally\nexit: 0\nstdout:\nsite                 3h30m\ndocs                 0h45m\ntotal                4h15m\nstderr: (empty)\ndiff vs expected (site 3h30m / docs 0h45m / total 4h15m):\nMATCH\n",
+    "check2-project-flag.log": "command: printf '2026-11-20 site 1h30m\\n2026-11-20 docs 45m\\n# note\\n2026-11-21 site 2h\\n' | ./tally --project site\nexit: 0\nstdout:\nsite                 3h30m\nstderr: (empty)\ncontains word total: NO (ok)\ndiff vs expected (single line site 3h30m):\nMATCH\n",
+    "probes-summary.log": "Extra probes (not acceptance checks):\n- empty stdin -> prints only 'total 0h00m', exit 0\n- comments-only -> prints only 'total 0h00m', exit 0\n- --project docs -> one line 'docs 0h45m', no total, exit 0\n- file argument with same timesheet -> same three lines as check 1, exit 0\n"
+  },
+  "problems": [],
+  "stored_at": "2026-11-21T18:37:15.586Z"
+}
