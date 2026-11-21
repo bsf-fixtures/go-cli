@@ -1,0 +1,39 @@
+# Reject an empty project name
+
+## plan
+
+Before: tally.Parse accepts a line whose project field is exactly `-` (e.g. `2026-11-20 - 45m`) as an entry for a project literally named `-`, so `tally` prints a `-` row and exits 0. After: Parse rejects it as a malformed line, the same way it rejects a bad day or duration. It returns on that first bad line with `fmt.Errorf("line %d: %q is not a project name like site", n, f[1])`. The check goes in internal/tally/tally.go between the existing day check and duration check, so it follows field order. Only the exact field `-` is rejected; other project names (including ones that contain `-`, like `my-site`) are unchanged. Nothing else changes: cmd/tally/main.go is not touched, because it already prints any Parse error as `tally: <err>` on stderr and exits 1. Optionally, the package doc comment in tally.go may mention that a `-` project is malformed.
+
+## files
+
+- internal/tally/tally.go
+- internal/tally/tally_test.go
+
+## feature folders
+
+- internal/tally/
+
+## acceptance checks
+
+- After `go build -o tally ./cmd/tally`, running `printf '2026-11-20 site 1h30m\n2026-11-20 - 45m\n' | ./tally` prints nothing on stdout, prints `tally: line 2: "-" is not a project name like site` on stderr, and exits with status 1.
+- The same input given as a file argument (`./tally timesheet.txt`, where the file holds those two lines) prints the same stderr message and exits 1.
+- A valid timesheet still totals: `printf '2026-11-20 site 1h30m\n2026-11-20 my-site 45m\n' | ./tally` prints `site                 1h30m` then `my-site              0h45m` and exits 0.
+- `go vet ./... && go test ./...` passes, including the new test that checks Parse rejects a `-` project and names its line.
+
+## tests added
+
+- internal/tally/tally_test.go: TestParseRejectsADashProjectNamingItsLine. Parse("2026-11-20 site 1h\n2026-11-21 - 45m\n") returns nil entries and an error whose text contains `line 2` and `"-"`; on failure it calls t.Fatalf with the actual error interpolated.
+
+## tests changed
+
+- internal/tally/tally_test.go
+
+## research
+
+- `{"claim":"Parse splits each non-blank, non-comment line into exactly three fields with strings.Fields and validates only the day (f[0]) and duration (f[2]). The project (f[1]) is stored without any check, so `-` becomes a project.","source":"internal/tally/tally.go:43"}`
+- `{"claim":"Current behavior: a `-` project is accepted and totalled as its own row, exit 0.","source":"ran: go build -o /tmp/gh-aw/agent/tally ./cmd/tally && printf '2026-11-20 site 1h30m\\n2026-11-20 - 45m\\n' | /tmp/gh-aw/agent/tally; echo exit=$?  (printed `-                    0h45m`, exit=0)"}`
+- `{"claim":"The repo's dominant pattern for bad input is an fmt.Errorf from internal/tally that gives the line number first, then the quoted bad text, then an example the user could copy. Parse fails fast on the first bad line. No lenient mode is allowed.","source":".factory/definition/context/fundamentals.md (Dominant patterns; Taste: 'Say the line number')"}`
+- `{"claim":"main already turns any Parse error into `tally: <err>` on stderr and exit 1, and fundamentals says main must stay thin. So cmd/tally/main.go needs no change, and leaving it out avoids the 80% diff-coverage gate on that untested package.","source":".factory/definition/context/fundamentals.md (Keep main thin; cmd/tally has no tests)"}`
+- `{"claim":"The existing tests use full-sentence names and t.Fatalf with the actual value, and the malformed-line test checks strings.Contains(err.Error(), \"line 2\"). The new test follows the same shape in the same file, so tally_test.go is an edited existing test file and must be declared.","source":"internal/tally/tally_test.go:18"}`
+- `{"claim":"product_work may change code and tests. Edits to existing test files must be listed in tests_changed. Neither file is protected.","source":".factory/definition/policy.yaml"}`
+- `{"claim":"The sandbox can build the binary, run it on stdin and on a file argument, and read stdout, stderr and the exit status. That covers every acceptance check.","source":".factory/sandbox/manifest.json (capabilities.exercised)"}`
