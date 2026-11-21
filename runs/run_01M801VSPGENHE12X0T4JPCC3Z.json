@@ -1,0 +1,19 @@
+{
+  "schema": "run/1",
+  "id": "run_01M801VSPGENHE12X0T4JPCC3Z",
+  "work_item": "wi_01M801NDVB1TZJ29GF6MT0VSKJ",
+  "pipeline": "product_work",
+  "actor": {
+    "kind": "agent",
+    "harness": "claude-code"
+  },
+  "started_at": "2026-11-21T21:58:09.360Z",
+  "ended_at": "2026-11-21T21:59:23.751Z",
+  "duration_sec": 74,
+  "outcome": "failed",
+  "pr": null,
+  "steps": [],
+  "gates": [],
+  "cost_usd": 0,
+  "escalated": false
+}
