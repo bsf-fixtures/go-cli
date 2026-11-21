@@ -5,7 +5,17 @@
     "unknown": 0.155,
     "product_work": 4.2064
   },
-  "inflight": [],
+  "inflight": [
+    {
+      "key": "44954353265-1-spec",
+      "pipeline": "product_work",
+      "role": "spec",
+      "model": "claude-opus-5-5",
+      "agent_ceiling_usd": 5.64,
+      "detection_ceiling_usd": 0.83,
+      "started_at": "2026-11-21T22:06:59.412Z"
+    }
+  ],
   "settled": [
     "44951031834-1-triage",
     "44951424102-1-triage",
@@ -17,5 +27,5 @@
     "44953393500-1-build",
     "44954353265-1-triage"
   ],
-  "updated_at": "2026-11-21T22:05:26.266Z"
+  "updated_at": "2026-11-21T22:06:59.412Z"
 }
