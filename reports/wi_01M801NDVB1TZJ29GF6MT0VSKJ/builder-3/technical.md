@@ -1,0 +1,1 @@
+`internal/tally/tally.go`: `Parse` now returns `line N: "-" is not a project name like site` when the project field is exactly `-`. The check sits between the day and duration checks. `internal/tally/tally_test.go`: a new test covers the rejection, the line number, and that `my-site` still parses.
