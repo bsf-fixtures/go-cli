@@ -3,5 +3,11 @@
 # Go standard library (bufio, fmt, io, os, sort, strings, time). There is no
 # framework, no web library and no third-party client to research, so this
 # list is short because the repo is, not because it was left unfinished.
+#
+# The amendment that added commands.coverage and the gofmt static check
+# introduced no dependency either: `go test -coverpkg`, `go tool cover`,
+# `gofmt` and `awk` are all local, and their documentation lives on the two
+# hosts already listed. The SARIF schema URL emitted in the report is an
+# identifier, not a host the sandbox fetches.
 pkg.go.dev
 go.dev
