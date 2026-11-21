@@ -2,7 +2,7 @@
   "schema": "budget/2",
   "month": "2026-11",
   "spent_usd": {
-    "unknown": 0.0518,
+    "unknown": 0.1035,
     "product_work": 4.1017
   },
   "inflight": [],
@@ -12,7 +12,8 @@
     "44951641731-1-triage",
     "44952019103-1-triage",
     "44951641731-1-spec",
-    "44951641731-1-build"
+    "44951641731-1-build",
+    "44953021647-1-build"
   ],
-  "updated_at": "2026-11-21T21:43:06.784Z"
+  "updated_at": "2026-11-21T21:47:26.102Z"
 }
