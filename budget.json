@@ -5,7 +5,17 @@
     "unknown": 0.155,
     "product_work": 5.2675
   },
-  "inflight": [],
+  "inflight": [
+    {
+      "key": "44955917863-2-agent-verification",
+      "pipeline": "product_work",
+      "role": "verifier",
+      "model": "claude-haiku-5-5",
+      "agent_ceiling_usd": 2.33,
+      "detection_ceiling_usd": 0.83,
+      "started_at": "2026-11-21T22:37:16.971Z"
+    }
+  ],
   "settled": [
     "44951031834-1-triage",
     "44951424102-1-triage",
@@ -20,5 +30,5 @@
     "44954353265-1-build",
     "44955917863-1-agent-verification"
   ],
-  "updated_at": "2026-11-21T22:24:21.116Z"
+  "updated_at": "2026-11-21T22:37:16.971Z"
 }
