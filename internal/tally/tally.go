@@ -88,6 +88,17 @@ func ProjectTotal(entries []Entry, project string) Total {
 	return out
 }
 
+// GrandTotal sums the minutes of every entry into one Total labelled "total".
+// The label is fixed so the all-projects output can print it with the same
+// column formatter as a per-project row, without main inventing a second sum.
+func GrandTotal(entries []Entry) Total {
+	out := Total{Project: "total"}
+	for _, e := range entries {
+		out.Minutes += e.Minutes
+	}
+	return out
+}
+
 // Format renders minutes as "1h05m".
 func Format(minutes int) string {
 	return fmt.Sprintf("%dh%02dm", minutes/60, minutes%60)

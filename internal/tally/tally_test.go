@@ -48,6 +48,14 @@ func TestProjectTotalIsZeroForAProjectWithNoEntries(t *testing.T) {
 	}
 }
 
+func TestGrandTotalSumsEveryEntry(t *testing.T) {
+	got := GrandTotal([]Entry{{Project: "site", Minutes: 90}, {Project: "docs", Minutes: 45}, {Project: "site", Minutes: 120}})
+	want := Total{Project: "total", Minutes: 255}
+	if got != want {
+		t.Fatalf("got %+v, want %+v", got, want)
+	}
+}
+
 func TestFormatPadsMinutes(t *testing.T) {
 	if Format(65) != "1h05m" {
 		t.Fatalf("got %s", Format(65))

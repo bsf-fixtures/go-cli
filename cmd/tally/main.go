@@ -54,5 +54,7 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	for _, t := range tally.Totals(entries) {
 		fmt.Fprintf(stdout, "%-20s %s\n", t.Project, tally.Format(t.Minutes))
 	}
+	gt := tally.GrandTotal(entries)
+	fmt.Fprintf(stdout, "%-20s %s\n", gt.Project, tally.Format(gt.Minutes))
 	return 0
 }
