@@ -5,34 +5,51 @@
   Every agent reads this first. The question it has to answer is "where would
   this change go?" — so it names folders and what each one owns, not what the
   product does.
-
-  {{PLACEHOLDERS}} are filled in by setup.
 -->
 
-# Feature map — {{REPO_NAME}}
+# Feature map — go-cli
 
-{{ONE_LINE_WHAT_THIS_REPO_IS}}
+`tally` is a single Go command-line program that reads a plain-text timesheet
+and prints the total time per project. There is no web surface, no server and
+no database.
 
 ## Feature folders
 
 | Folder | Owns | Depends on |
 | --- | --- | --- |
-{{FEATURE_FOLDER_ROWS}}
+| `internal/tally/` | The whole domain: `Entry` and `Total`, `Parse` (one line per entry, blank and `#` lines skipped, a malformed line returned as an error naming its line number), `Totals` (sum per project, largest first, ties by name), `Format` (minutes as `1h05m`). | Standard library only: `bufio`, `fmt`, `io`, `sort`, `strings`, `time`. |
+| `cmd/tally/` | The executable: choosing stdin or `os.Args[1]`, opening the file, reporting an error on stderr as `tally: …` and exiting 1, and printing each total in a `%-20s` column. | `internal/tally`; standard library `fmt`, `io`, `os`. |
 
 ## Shared
 
 | Folder | What it is | Rule |
 | --- | --- | --- |
-{{SHARED_FOLDER_ROWS}}
+| — | There is no shared folder. The repo has exactly two packages and one import edge between them, so nothing has yet been used twice. | Do not create one for a first use. `internal/tally` is already the place for logic, and `cmd/tally` should stay thin enough that it has nothing to share. |
 
 ## Where things go
 
-- **A new feature** gets its own folder under {{FEATURE_ROOT}}.
-- **Something used by two features** moves to {{SHARED_ROOT}}, and not before
-  the second use. One caller is not a shared concern.
+- **A new feature** gets its own folder under `internal/`. A second command
+  gets its own folder under `cmd/`, as `cmd/<name>/main.go`.
+- **Something used by two features** moves to `internal/`, and not before the
+  second use. One caller is not a shared concern.
 - **Nothing in a feature folder imports from another feature folder.** Where
   two features need the same thing, it belongs in shared.
+- **The import edge runs one way:** `cmd/` imports `internal/`, never the
+  reverse. Parsing, totalling and formatting decisions belong in
+  `internal/tally` where they are testable without a process; `cmd/tally`
+  should only wire a reader to a writer and turn an error into an exit code.
+- **Tests sit beside the code** as `*_test.go` in the same package.
+  `internal/tally/tally_test.go` is the only test file in the repo.
 
 ## Not in this repo
 
-{{OUT_OF_SCOPE}}
+- No HTTP server, handler, template or static asset — nothing renders.
+- No database, cache, queue, object store or any other service.
+- No third-party dependency of any kind: `go.mod` has no `require` block and
+  there is no `go.sum`. Everything is the Go standard library.
+- No configuration surface: no environment variable is read, no config file
+  is parsed, no `flag` is registered. Input is stdin or one positional path.
+- No Dockerfile, compose file, devcontainer or deploy script.
+- No `internal/` package other than `tally`, and no second command.
+- The `.factory/` tree and the `factory-*` workflows are the factory's own
+  machinery operating on this repo, not part of the application.

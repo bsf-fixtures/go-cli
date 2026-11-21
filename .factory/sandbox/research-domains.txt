@@ -1,0 +1,7 @@
+# Documentation hosts for what this repo actually uses. go.mod has no
+# require block and there is no go.sum: every import in both packages is the
+# Go standard library (bufio, fmt, io, os, sort, strings, time). There is no
+# framework, no web library and no third-party client to research, so this
+# list is short because the repo is, not because it was left unfinished.
+pkg.go.dev
+go.dev
