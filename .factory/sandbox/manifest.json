@@ -1,0 +1,106 @@
+{
+  "schema": "sandbox/1",
+  "tier": "build_and_test",
+  "tier_reason": "tally is a command-line program with no HTTP surface. The trial reaches `renders` only when `app_url` answers an HTTP request and a browser screenshot of it succeeds, and there is no page to point it at: cmd/tally/main.go reads stdin or a file argument, prints to stdout, and exits. Everything this repo contains does build and test, so build_and_test is the ceiling here rather than a shortfall.",
+  "commands": {
+    "install": "go mod download",
+    "build": "go build ./... && go build -o tally ./cmd/tally",
+    "run": "printf '2026-11-20 site 1h30m\\n2026-11-20 docs 45m\\n' | ./tally",
+    "test": "go vet ./... && go test ./...",
+    "seed": null
+  },
+  "app_url": null,
+  "env": [],
+  "services": [],
+  "egress": [
+    "proxy.golang.org",
+    "sum.golang.org",
+    "storage.googleapis.com"
+  ],
+  "stubs": [],
+  "dropped": [
+    {
+      "from": ".github/workflows/ci.yml",
+      "what": "actions/setup-go@v5 with go-version-file: go.mod",
+      "why": "That step provisions a toolchain on a GitHub runner; the sandbox already has Go on PATH (go1.26.11 here, satisfying the `go 1.22` line in go.mod), so pinning it again is CI plumbing rather than something the app needs installed."
+    },
+    {
+      "from": ".github/workflows/ci.yml",
+      "what": "The \"The binary totals a timesheet\" step: `go run ./cmd/tally` piped a two-line timesheet and grepped for '^site *1h30m$'",
+      "why": "Not dropped as unnecessary — it is the right smoke check, and it is carried into the runbook's Verify section and into capabilities.exercised instead. It is kept out of commands.test so that a failure there reads as \"the binary misbehaved\" rather than \"go test failed\"."
+    },
+    {
+      "from": ".github/workflows/factory-*.yml",
+      "what": "The dozen factory-* workflows and .factory/bin/bsf",
+      "why": "These are the factory's own machinery operating on this repo, not part of the application under test. Building or running them is not what verifying a change to tally means."
+    }
+  ],
+  "capabilities": {
+    "exercised": [
+      "Compiling every package in the module (`go build ./...`) and linking the `tally` binary that .gitignore expects at the repo root",
+      "`go vet ./...` across cmd/tally and internal/tally",
+      "The unit tests in internal/tally/tally_test.go: comment and blank-line skipping, the named-line parse error, Totals ordering (largest first, ties by name), and Format's zero-padded minutes — 90.0% of statements in internal/tally",
+      "Running the built binary on stdin and on a file argument, reading its stdout, and checking its exit status",
+      "The malformed-input contract end to end: a bad duration or day prints `tally: line N: ...` on stderr and exits 1 rather than totalling a silent zero",
+      "The missing-file path: `./tally /nope.txt` prints `tally: open ...: no such file or directory` and exits 1"
+    ],
+    "not_exercised": [
+      {
+        "what": "Anything a browser would see — a rendered page, a screenshot, a DOM assertion",
+        "paths": [],
+        "why": "The repo has no web surface at all: no server, no templates, no HTTP handler. This is the fixture's stated point, not a gap in the sandbox."
+      },
+      {
+        "what": "Automated test coverage of cmd/tally/main.go — argument handling, the stdin-vs-file choice, the `%-20s` output column, and the exit codes",
+        "paths": [
+          "cmd/tally/main.go"
+        ],
+        "why": "There is no test file for package main, so `go test ./...` reports 0.0% of statements there. The behaviour is reachable only by running the binary and reading its output, which verification here does by hand. A change to cmd/tally that needs a coverage number — the coverage gate asks 80% on changed lines — has nothing to count, so it will need a test added alongside it."
+      },
+      {
+        "what": "Behaviour on any OS other than linux/amd64, and on non-UTF-8 or very large timesheets",
+        "paths": [],
+        "why": "The trial runs a single Linux runner, and bufio.Scanner's default 64KiB line limit is never approached by the inputs tried here. Nothing in the repo asks for either, so no attempt was made to cover them."
+      }
+    ]
+  },
+  "episode": [
+    {
+      "attempt": 1,
+      "tried": "Read the whole repo before running anything: README.md, go.mod, cmd/tally/main.go, internal/tally/tally.go, internal/tally/tally_test.go, .gitignore, and .github/workflows/ci.yml. Grepped all Go sources for os.Getenv, os.LookupEnv, os.Environ and the flag package to find every place configuration is read.",
+      "observed": "go.mod declares module github.com/bsf-fixtures/go-cli at go 1.22 with no require block — the program is pure standard library. The grep for configuration returned nothing: tally takes its entire input from stdin or os.Args[1] and reads no environment variable and no config file. .gitignore ignores `/tally`, which says the binary is built at the repo root under that name. ci.yml runs `go vet ./...`, `go test ./...`, and a smoke step piping a timesheet through `go run ./cmd/tally`. There is no Dockerfile, compose file, devcontainer or deploy script anywhere in the repo.",
+      "changed": "Settled the shape of the manifest from reading alone: env is empty because the app reads nothing, services and stubs are empty because the app talks to nothing, and the tier cannot exceed build_and_test because there is no URL to render."
+    },
+    {
+      "attempt": 2,
+      "tried": "Ran install, build, vet and test under an environment stripped to what the trial actually passes through (PATH, HOME, TMPDIR, LANG, CI only, per shellBase in the runner), to be sure nothing inherited from this shell was propping them up: `go mod download && go build ./... && go build -o tally ./cmd/tally && go vet ./... && go test ./...`.",
+      "observed": "All five succeeded. `go mod download` printed \"no module dependencies to download\" and made no network request. `go test ./...` reported ok for internal/tally and \"[no test files]\" for cmd/tally; with -cover, internal/tally is 90.0% of statements and cmd/tally is 0.0%.",
+      "changed": "Fixed commands.install to `go mod download` (it is a real, fast, offline no-op today and the correct command the moment a dependency is added) and commands.build to also link `./tally`, so a verifier has the binary the README and .gitignore imply rather than only warm build-cache entries."
+    },
+    {
+      "attempt": 3,
+      "tried": "Ran the trial's own control check by hand: executed the build and test commands in a fresh empty directory, the way `bsf sandbox trial` does to catch commands that pass without building or testing anything.",
+      "observed": "Both failed with \"pattern ./...: directory prefix . does not contain main module or its selected dependencies\", exit 1. The commands are genuinely bound to this module.",
+      "changed": "Nothing. This confirmed the build and test commands would not collapse the measured tier to static."
+    },
+    {
+      "attempt": 4,
+      "tried": "Exercised the built binary on the paths a person would: a three-entry timesheet with a comment line on stdin; a timesheet with a malformed duration; a timesheet passed as a file argument; and a path that does not exist.",
+      "observed": "The good input printed `site 3h30m` then `docs 0h45m` — largest first, zero-padded minutes — and exited 0. The malformed input printed `tally: line 2: \"ninety\" is not a positive duration like 1h30m` to stderr and exited 1, naming the line as the package doc promises. The file argument worked. The missing path printed `tally: open /nope.txt: no such file or directory` and exited 1.",
+      "changed": "Wrote these into the runbook's Verify section and into capabilities.exercised, and kept commands.run as the README's pipe so the command recorded here is one that was actually run."
+    },
+    {
+      "attempt": 5,
+      "tried": "Validated the finished manifest with `.factory/bin/bsf sandbox check --file /tmp/gh-aw/agent/bsf/setup/manifest.json`.",
+      "observed": "\"valid sandbox manifest, tier build_and_test\", exit 0.",
+      "changed": null
+    },
+    {
+      "attempt": 6,
+      "tried": "trial of round 1: install, build, test, control",
+      "observed": "reached build_and_test, as claimed",
+      "changed": null
+    }
+  ],
+  "frozen_at": "2026-11-21T05:33:13.958Z"
+}
