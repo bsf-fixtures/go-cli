@@ -1,0 +1,124 @@
+{
+  "schema": "sandbox/1",
+  "tier": "build_and_test",
+  "tier_reason": "This repo is a Go CLI fixture that currently contains no Go code at all: the only tracked file outside .factory/, .github/ and .claude/ is README.md. There is no go.mod, no package, no main, no test. So there is nothing to start and no HTTP surface for a browser to see, which rules out renders; and even once code lands, a CLI has no page. The commands below are the real Go build and test commands, guarded so they are honest no-ops until the first go.mod lands and become genuine the moment it does.",
+  "commands": {
+    "install": "if [ -f go.mod ]; then go mod download; else echo 'no go.mod in this repo yet: nothing to download'; fi",
+    "build": "if [ -f go.mod ]; then go build ./...; else echo 'no go.mod in this repo yet: nothing to build'; fi",
+    "run": null,
+    "test": "if [ -f go.mod ]; then go test ./...; else echo 'no go.mod in this repo yet: no tests to run'; fi",
+    "seed": null
+  },
+  "app_url": null,
+  "env": [],
+  "services": [],
+  "egress": [
+    "proxy.golang.org",
+    "sum.golang.org",
+    "go.dev",
+    "pkg.go.dev"
+  ],
+  "stubs": [],
+  "dropped": [
+    {
+      "from": ".github/workflows/",
+      "what": "Every workflow in the repo: factory-gates, factory-run, the seven factory-role-* pairs, factory-setup, factory-setup-trial, factory-intake, factory-merge, factory-audit and the rest.",
+      "why": "They are the factory's own machinery, not the app's CI. None of them installs, builds or runs application code, so none of them says anything about what this app needs installed. There is no app CI workflow in this repo to read."
+    },
+    {
+      "from": "the repo as a whole",
+      "what": "No Dockerfile, no compose file, no devcontainer, no deploy or release script, no Makefile, no .env or .env.example, no config file of any kind.",
+      "why": "Recorded as absent rather than omitted: there was no production description to mistake for a build instruction. Nothing was dropped here because nothing existed."
+    }
+  ],
+  "capabilities": {
+    "exercised": [
+      "The Go toolchain is present and usable from the repo root (go 1.26.11 in this agent's sandbox; ubuntu-latest on the runner supplies its own).",
+      "go build ./... over every package in the module, once a go.mod exists.",
+      "go test ./... over every package's unit tests, once a go.mod exists. Proven against a scratch module with a package, a test and a third-party dependency, under the sandbox's closed environment.",
+      "go mod download against the public module proxy, so a module with third-party dependencies resolves them.",
+      "go vet ./..., which is what `bsf gates static` runs for Go; it is invoked by the gate itself, not by a command in this manifest.",
+      "gofmt, which is installed alongside go.",
+      "Building a CLI binary and invoking it with arguments from a shell."
+    ],
+    "not_exercised": [
+      {
+        "what": "Anything at all, today. install, build and test are no-ops until the first go.mod is committed.",
+        "paths": [
+          "go.mod"
+        ],
+        "why": "The repo contains no Go code. The commands are written so the trial measures build_and_test rather than static, and so they start doing real work the instant a module lands — but right now they prove only that the toolchain is reachable, not that any code compiles."
+      },
+      {
+        "what": "Starting the app and seeing it render in a browser.",
+        "paths": [],
+        "why": "This is a command-line program, not a server. There is no port to bind and no page to screenshot, so `renders` is not reachable here by design, not by omission. app_url and commands.run are null for that reason."
+      },
+      {
+        "what": "Diff coverage as a real gate.",
+        "paths": [],
+        "why": "`bsf gates coverage` reads only coverage/coverage-summary.json (istanbul), coverage/lcov.info or coverage.xml (cobertura). Go's native `go test -coverprofile` format is none of these, and converting it needs a third-party tool that is not installed. With floor_pct at 0 in .factory/guardrails/coverage.json the gate reports neutral rather than failing, so the diff_min_pct of 80 is not actually enforced. Writing an approximate converter would have produced misleading percentages, which is worse than none."
+      },
+      {
+        "what": "golangci-lint and any linter beyond go vet.",
+        "paths": [],
+        "why": "golangci-lint is not installed in the sandbox and no linter config exists in the repo. The static gate's Go support is go vet only."
+      },
+      {
+        "what": "Any external service, database, cache, queue or third-party API.",
+        "paths": [],
+        "why": "No code reads any configuration, so there is nothing to point at a service and nothing to stub. services and stubs are empty because the app genuinely needs neither, not because they were skipped. A test that later reaches a network service will fail loudly in the closed environment, which is the intended behaviour."
+      },
+      {
+        "what": "Integration or end-to-end tests that need the CLI installed on PATH, or that need a TTY.",
+        "paths": [],
+        "why": "The trial runs each command through `bash -c` with no terminal attached. A test that requires an interactive terminal will not behave as it would for a developer."
+      }
+    ]
+  },
+  "episode": [
+    {
+      "attempt": 1,
+      "tried": "Read the repo before running anything: git ls-files, the full file tree, README.md, .gitignore, every .github/workflows file, .factory/definition/factory.yaml, policy.yaml and the guardrails, looking for go.mod, Cargo.toml, package.json, a Dockerfile, a compose file, a devcontainer, a Makefile or any config file.",
+      "observed": "The only tracked file outside .factory/, .github/ and .claude/ is README.md, which reads 'Build Software Factory: Fixture of a Go CLI to install factory on'. There is no go.mod and no .go file anywhere. The single commit in history, c16628e, added the factory scaffolding only. Grepping for configuration readers found nothing because there is no source to grep, so the env list is empty as a fact about the repo rather than an oversight.",
+      "changed": "Settled the shape of the hypothesis: a Go repo with no module yet, no services, no stubs, no environment."
+    },
+    {
+      "attempt": 2,
+      "tried": "Read the runner itself (.factory/bin/runner.tgz) to learn how the trial measures a tier, rather than guessing: reachedTier(), trialSandbox(), sandboxEnv(), shellBase(), readCoverage() and runGoVet().",
+      "observed": "reachedTier returns static if install, build or test fails, and also if all three are null; renders needs app_url to answer HTTP and a screenshot to be taken; otherwise build_and_test. The trial's environment is closed to PATH, HOME, TMPDIR, LANG, CI and RUNNER_TEMP plus the declared variables. The static gate runs `go vet ./...` itself. Coverage is read only from istanbul, lcov or cobertura files.",
+      "changed": "Ruled out null commands, which would have measured static. Ruled out renders, since a CLI has no HTTP surface. Decided commands must be guarded so they exit 0 on a repo with no module."
+    },
+    {
+      "attempt": 3,
+      "tried": "Ran the three guarded commands against the repo exactly as the trial will, with `env -i` reduced to PATH, HOME, LANG and CI to imitate the closed environment.",
+      "observed": "All three printed their 'no go.mod yet' line and exited 0. Unguarded `go build ./...` in the same place fails with 'go.mod file not found in the current directory or any parent directory', which would have measured static.",
+      "changed": "Kept the guards. Recorded in tier_reason that they are no-ops today."
+    },
+    {
+      "attempt": 4,
+      "tried": "Built a scratch Go module in /tmp (go.mod, cmd/probe/main.go, internal/greet with a passing test) and ran the same guarded install, build and test commands against it under the same reduced environment, then added a real third-party dependency (github.com/spf13/cobra v1.8.1) via go get and repeated.",
+      "observed": "go mod download, go build ./... and go test ./... all succeeded, before and after the dependency: 'ok example.com/probe/internal/greet' and '[no test files]' for the command package, exit 0 throughout. go vet ./... also exited 0. The dependency resolved from proxy.golang.org.",
+      "changed": "Nothing: this confirmed the commands become genuine the moment a go.mod lands, which is what the guards are for. Added proxy.golang.org and sum.golang.org to egress so the module path is explicit."
+    },
+    {
+      "attempt": 5,
+      "tried": "Checked that `go mod download` will work where the gates run, after seeing it fail inside this agent's own sandbox with 'network is unreachable'.",
+      "observed": "The failure was an artefact of stripping HTTPS_PROXY with env -i: this agent's sandbox routes HTTPS through a squid proxy, and curl to proxy.golang.org returns 200 with the proxy variables present. The trial and factory-gates both run directly on ubuntu-latest with open network and no proxy, so the closed environment's missing proxy variables do not apply there.",
+      "changed": "Nothing. Confirmed no proxy variable belongs in env: hard-coding this sandbox's proxy would be wrong for the runner, and the runner does not need one."
+    },
+    {
+      "attempt": 6,
+      "tried": "Validated the finished manifest with `.factory/bin/bsf sandbox check`, then ran the trial itself locally against this repo with `.factory/bin/bsf sandbox trial --candidate .../manifest.json --out .../trial.json`, which is the same code path the runner uses.",
+      "observed": "'valid sandbox manifest, tier build_and_test', then 'reached build_and_test, as claimed' with met=true: install, build and test each exited 0, no service to bring up, no run step because app_url is null.",
+      "changed": "Nothing further. The claim is measured rather than asserted."
+    },
+    {
+      "attempt": 7,
+      "tried": "trial of round 1: install, build, test",
+      "observed": "reached build_and_test, as claimed",
+      "changed": null
+    }
+  ],
+  "frozen_at": "2026-11-21T04:42:17.317Z"
+}

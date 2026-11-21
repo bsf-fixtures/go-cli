@@ -1,0 +1,15 @@
+# Documentation hosts for the stack this repo actually uses.
+#
+# As of 2026-11-21 this repo has no go.mod and no dependencies, so there is no
+# framework or library documentation to list. What it does have is the Go
+# toolchain and the standard library, and those are what the spec role will
+# need to research: the language spec, the standard library reference, the
+# module and testing documentation, and the command documentation for go,
+# gofmt and go vet.
+#
+# Nothing speculative is listed here. When the first dependency is added to
+# go.mod, its documentation host belongs in this file — and for almost every
+# Go library that host is already pkg.go.dev.
+
+go.dev
+pkg.go.dev

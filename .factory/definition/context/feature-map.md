@@ -5,34 +5,83 @@
   Every agent reads this first. The question it has to answer is "where would
   this change go?" — so it names folders and what each one owns, not what the
   product does.
-
-  {{PLACEHOLDERS}} are filled in by setup.
 -->
 
-# Feature map — {{REPO_NAME}}
+# Feature map — go-cli
 
-{{ONE_LINE_WHAT_THIS_REPO_IS}}
+A Go command-line program. As of 2026-11-21 the application does not exist
+yet: the only tracked file outside `.factory/`, `.github/` and `.claude/` is
+`README.md`, which says "Build Software Factory: Fixture of a Go CLI to
+install factory on". There is no `go.mod`, no `.go` file, no test and no
+import graph to draw.
+
+Everything below marked **proposed** is a convention chosen for the first
+change to establish, not something observed in the repo. Everything marked
+**observed** was read from the repo as it stands.
 
 ## Feature folders
 
+Nothing observed. There are no source folders in this repo yet, so this table
+has no rows. The first change that adds Go code should add its row here.
+
 | Folder | Owns | Depends on |
 | --- | --- | --- |
-{{FEATURE_FOLDER_ROWS}}
+| | | |
 
 ## Shared
 
+Nothing observed. Same reason: there is no second caller yet, because there is
+no first one.
+
 | Folder | What it is | Rule |
 | --- | --- | --- |
-{{SHARED_FOLDER_ROWS}}
+| | | |
+
+What *is* in the repo, so that nobody mistakes it for app code:
+
+| Folder | What it is | Rule |
+| --- | --- | --- |
+| `.factory/definition/` | The factory's own configuration: `factory.yaml`, `policy.yaml`, the role prompts, the rubrics and the context templates. | Protected. Changing it is the `definition` pipeline and needs a trusted human's approval. |
+| `.factory/guardrails/` | `baselines.json` (empty), `coverage.json`, `candidates.json`. | Only the `hardening` pipeline may tighten these; loosening needs a trusted human. |
+| `.factory/bin/` | The vendored `bsf` runner that every gate executes. | Protected. Never edited by a factory PR. |
+| `.github/workflows/` | The factory's workflows and the compiled `*.lock.yml` role workflows. There is no CI workflow for the application. | Protected in every pipeline. |
+| `.claude/skills/` | The bundled `playwright-cli` skill. | Not application code. |
 
 ## Where things go
 
-- **A new feature** gets its own folder under {{FEATURE_ROOT}}.
-- **Something used by two features** moves to {{SHARED_ROOT}}, and not before
-  the second use. One caller is not a shared concern.
+These are **proposed**: the layout a Go CLI conventionally uses
+(`https://go.dev/doc/modules/layout`), to be established by whichever change
+first adds code. Nothing enforces it today.
+
+- **A new feature** gets its own folder under `internal/`.
+- **Command entrypoints** — the `main` package for each binary — go under
+  `cmd/<binary-name>/`, and stay thin: flag parsing and wiring only, with the
+  behaviour in `internal/`.
+- **Something used by two features** moves to `internal/shared/`, and not
+  before the second use. One caller is not a shared concern.
 - **Nothing in a feature folder imports from another feature folder.** Where
   two features need the same thing, it belongs in shared.
+- `internal/` rather than `pkg/` on purpose: Go's compiler enforces that
+  `internal/` is not importable from outside the module, which keeps the CLI's
+  packages from quietly becoming somebody's library.
 
 ## Not in this repo
 
-{{OUT_OF_SCOPE}}
+**Observed.** None of the following exists here, and an agent should not go
+looking for it:
+
+- No application source, module file, dependency set or lockfile.
+- No HTTP server, no web UI, no page to render. This is a CLI, so the sandbox
+  tops out at `build_and_test`; see `runbook.md`.
+- No database, cache, queue, object store or message broker. No migrations,
+  no seed data, no fixtures.
+- No third-party API client, so nothing is stubbed.
+- No configuration of any kind: no `.env`, no `.env.example`, no settings
+  module, no YAML or TOML config, and no code that reads an environment
+  variable. The sandbox's environment list is empty as a consequence.
+- No Dockerfile, compose file, devcontainer, Makefile, deploy script or
+  release pipeline.
+- No linter configuration. The static gate runs `go vet ./...` and nothing
+  else; `golangci-lint` is not installed.
+- No application CI. Every workflow in `.github/workflows/` belongs to the
+  factory.
