@@ -1,0 +1,72 @@
+{
+  "schema": "run/1",
+  "id": "run_01M801ZFSGY2163VMJT43RHVCX",
+  "work_item": "wi_01M801NDVB1TZJ29GF6MT0VSKJ",
+  "pipeline": "product_work",
+  "actor": {
+    "kind": "agent",
+    "harness": "claude-code"
+  },
+  "started_at": "2026-11-21T22:00:10.288Z",
+  "ended_at": "2026-11-21T22:25:21.439Z",
+  "duration_sec": 1511,
+  "outcome": "escalated",
+  "pr": 32,
+  "steps": [
+    {
+      "role": "builder",
+      "model": "claude-sonnet-5-5",
+      "attempt": 3,
+      "duration_sec": 0,
+      "tokens": {
+        "in": 14,
+        "out": 2622
+      },
+      "cost_usd": 0.1333,
+      "transcript": "",
+      "exit": "ok"
+    },
+    {
+      "role": "spec",
+      "model": "claude-opus-5-5",
+      "attempt": 3,
+      "duration_sec": 0,
+      "tokens": {
+        "in": 27,
+        "out": 4887
+      },
+      "cost_usd": 0.4553,
+      "transcript": "",
+      "exit": "ok"
+    },
+    {
+      "role": "triage",
+      "model": "claude-haiku-5-5",
+      "attempt": 3,
+      "duration_sec": 0,
+      "tokens": {
+        "in": 12,
+        "out": 2584
+      },
+      "cost_usd": 0.0075,
+      "transcript": "",
+      "exit": "ok"
+    }
+  ],
+  "gates": [
+    {
+      "gate": "static",
+      "attempt": 3,
+      "result": "pass",
+      "commit": "6a5ddbbd51db71ee0aca2cdecdb87a77b05b885f"
+    },
+    {
+      "gate": "verification",
+      "attempt": 3,
+      "result": "pass",
+      "commit": "6a5ddbbd51db71ee0aca2cdecdb87a77b05b885f"
+    }
+  ],
+  "cost_usd": 0.5961,
+  "escalated": true
+}

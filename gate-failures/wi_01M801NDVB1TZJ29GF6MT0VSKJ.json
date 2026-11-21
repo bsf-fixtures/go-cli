@@ -1,0 +1,13 @@
+{
+  "head_sha": "6a5ddbbd51db71ee0aca2cdecdb87a77b05b885f",
+  "attempt": 3,
+  "recorded_at": "2026-11-21T22:25:20.369Z",
+  "items": [
+    {
+      "check": "factory/gates",
+      "conclusion": "failure",
+      "title": "A planned gate did not pass",
+      "summary": "static: planned, success\nverification: planned, success\nagent: planned, failure — FAILED"
+    }
+  ]
+}
