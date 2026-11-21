@@ -74,6 +74,20 @@ func Totals(entries []Entry) []Total {
 	return out
 }
 
+// ProjectTotal sums the minutes logged to one project, matching its name
+// exactly as Totals' map keying does. A project no entry names totals zero
+// rather than nothing at all: the caller asked about that project, so a zero
+// is the answer, where an absent row would be a silence to interpret.
+func ProjectTotal(entries []Entry, project string) Total {
+	out := Total{Project: project}
+	for _, e := range entries {
+		if e.Project == project {
+			out.Minutes += e.Minutes
+		}
+	}
+	return out
+}
+
 // Format renders minutes as "1h05m".
 func Format(minutes int) string {
 	return fmt.Sprintf("%dh%02dm", minutes/60, minutes%60)
