@@ -1,0 +1,33 @@
+{
+  "schema": "run/1",
+  "id": "run_01M800086HSES384VX69GXG4GY",
+  "work_item": "wi_01M7ZZPE21F5TT1WA6M68Z0Z55",
+  "pipeline": "product_work",
+  "actor": {
+    "kind": "agent",
+    "harness": "claude-code"
+  },
+  "started_at": "2026-11-21T21:25:38.129Z",
+  "ended_at": "2026-11-21T21:31:54.123Z",
+  "duration_sec": 376,
+  "outcome": "failed",
+  "pr": null,
+  "steps": [
+    {
+      "role": "triage",
+      "model": "claude-haiku-5-5",
+      "attempt": 2,
+      "duration_sec": 0,
+      "tokens": {
+        "in": 8,
+        "out": 2161
+      },
+      "cost_usd": 0.0066,
+      "transcript": "",
+      "exit": "ok"
+    }
+  ],
+  "gates": [],
+  "cost_usd": 0.0066,
+  "escalated": false
+}
