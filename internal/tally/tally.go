@@ -46,6 +46,9 @@ func Parse(r io.Reader) ([]Entry, error) {
 		if _, err := time.Parse("2006-01-02", f[0]); err != nil {
 			return nil, fmt.Errorf("line %d: %q is not a YYYY-MM-DD day", n, f[0])
 		}
+		if f[1] == "-" {
+			return nil, fmt.Errorf("line %d: %q is not a project name like site", n, f[1])
+		}
 		d, err := time.ParseDuration(f[2])
 		if err != nil || d <= 0 {
 			return nil, fmt.Errorf("line %d: %q is not a positive duration like 1h30m", n, f[2])

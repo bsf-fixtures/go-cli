@@ -53,3 +53,13 @@ func TestFormatPadsMinutes(t *testing.T) {
 		t.Fatalf("got %s", Format(65))
 	}
 }
+
+func TestParseRejectsADashProjectAndNamesItsLine(t *testing.T) {
+	_, err := Parse(strings.NewReader("2026-11-20 site 1h30m\n2026-11-20 - 45m\n"))
+	if err == nil || err.Error() != `line 2: "-" is not a project name like site` {
+		t.Fatalf("got %v", err)
+	}
+	if _, err := Parse(strings.NewReader("2026-11-20 my-site 45m\n")); err != nil {
+		t.Fatalf("my-site rejected: %v", err)
+	}
+}
