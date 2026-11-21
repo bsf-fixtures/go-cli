@@ -1,16 +1,12 @@
 {
-  "updated_at": "2026-11-21T18:41:58.767Z",
-  "paused": [],
-  "budget": {
-    "limitUsd": 35,
-    "limitMinutes": 2000,
-    "shares": {
-      "product_work": 60,
-      "gardening": 25,
-      "review_and_benchmarks": 15
-    },
-    "spentUsd": {},
-    "spentMinutes": {},
-    "productHardStopPct": 110
-  }
+  "schema": "budget/2",
+  "month": "2026-11",
+  "spent_usd": {
+    "unknown": 0
+  },
+  "inflight": [],
+  "settled": [
+    "44951031834-1-triage"
+  ],
+  "updated_at": "2026-11-21T21:24:37.792Z"
 }
