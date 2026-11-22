@@ -1,0 +1,26 @@
+{
+  "schema": "work-item/1",
+  "id": "wi_01M81ZB8NQYZPWV5SS97AMHYBD",
+  "created_at": "2026-11-22T15:52:39.351Z",
+  "source": {
+    "kind": "review",
+    "ref": null,
+    "actor": "factory",
+    "via": null
+  },
+  "trigger_class": "self",
+  "pipeline": "definition",
+  "title": "missing_evidence in cmd/tally (2×)",
+  "body": "missing_evidence is something the agent did not know, which a context or model change addresses\n\nRuns:\n- run_01M7Z7WF8G0170B4699R3CBDHN\n- run_01M7ZF3TW97YZZ10TXRA4Z36G1",
+  "priority": "normal",
+  "fingerprint": "sha256:bdee48421b02dbf1e3968fd6910f55fd37632873dbd8f54217ca726e3c9a838e",
+  "status": "queued",
+  "runs": [
+    "run_01M7Z7WF8G0170B4699R3CBDHN",
+    "run_01M7ZF3TW97YZZ10TXRA4Z36G1"
+  ],
+  "pr": null,
+  "parent": null,
+  "related": [],
+  "spec": null
+}

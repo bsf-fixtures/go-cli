@@ -1,0 +1,491 @@
+{
+  "schema": "review/1",
+  "id": "rev_20261122",
+  "window": {
+    "from": "2026-11-21T14:35:26.182Z",
+    "to": "2026-11-22T15:52:39.351Z",
+    "runs": 12
+  },
+  "scores": [
+    {
+      "run": "run_01M7Z7DY01B8J23J5Z86FYCZ4M",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Diff is test-only (internal/tally/parse_test.go added), so no production behaviour can change; static and verification gates passed."
+    },
+    {
+      "run": "run_01M7Z7DY01B8J23J5Z86FYCZ4M",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Three tests, all for Parse's line-shape, bad-day and non-positive-duration branches."
+    },
+    {
+      "run": "run_01M7Z7DY01B8J23J5Z86FYCZ4M",
+      "criterion": "builder:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Test-only diff and static gate passed; no rule counts before/after are carried, so this rests on the gate result alone."
+    },
+    {
+      "run": "run_01M7Z7DY01B8J23J5Z86FYCZ4M",
+      "criterion": "builder:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Request names internal/tally/tally_test.go but the builder added a new internal/tally/parse_test.go; the tests are on-target but the file choice departs from the request without explanation."
+    },
+    {
+      "run": "run_01M7Z7DY01B8J23J5Z86FYCZ4M",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Only the three test functions needed for the uncovered branches were added."
+    },
+    {
+      "run": "run_01M7Z7DY01B8J23J5Z86FYCZ4M",
+      "criterion": "builder:untagged",
+      "score": 3,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Parse is defined in internal/tally/tally.go and its existing tests live in tally_test.go; parse_test.go creates a second home for Parse tests."
+    },
+    {
+      "run": "run_01M7Z7DY01B8J23J5Z86FYCZ4M",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Tests assert on the exact error text, the line number named in it, and that no entries are returned for 0m and -1h; they fail if the guards are removed."
+    },
+    {
+      "run": "run_01M7Z7DY01B8J23J5Z86FYCZ4M",
+      "criterion": "verifier:missing_evidence",
+      "score": 2,
+      "tags": [
+        "missing_evidence"
+      ],
+      "note": "No verifier report and no coverage delta for the Parse branches; the only evidence is a gate pass, which does not show the new tests reach the previously untested branches."
+    },
+    {
+      "run": "run_01M7Z7WF8G0170B4699R3CBDHN",
+      "criterion": "builder:untagged",
+      "score": 3,
+      "tags": [
+        "untagged"
+      ],
+      "note": "main() was restructured into run(args, stdin, stdout, stderr) int with os.Exit moved to the caller; equivalence is argued by reading only, with no before/after run of the binary recorded and only gate results as evidence."
+    },
+    {
+      "run": "run_01M7Z7WF8G0170B4699R3CBDHN",
+      "criterion": "builder:untagged",
+      "score": 3,
+      "tags": [
+        "untagged"
+      ],
+      "note": "A gardening PR that both restructures production code (main.go) and adds tests; the refactor is a means to testability, but a reviewer must judge a production change inside a test-only cleanup."
+    },
+    {
+      "run": "run_01M7Z7WF8G0170B4699R3CBDHN",
+      "criterion": "builder:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Static gate passed and no guardrail, baseline or coverage file is touched; no before/after counts are carried."
+    },
+    {
+      "run": "run_01M7Z7WF8G0170B4699R3CBDHN",
+      "criterion": "builder:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Four tests cover stdin totals, file argument, missing file and malformed line; the production refactor goes beyond adding tests and is not explained by any report."
+    },
+    {
+      "run": "run_01M7Z7WF8G0170B4699R3CBDHN",
+      "criterion": "builder:untagged",
+      "score": 3,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Changing main.go was needed for in-process tests, but no report argues a smaller diff was not possible, and the change touches every exit path."
+    },
+    {
+      "run": "run_01M7Z7WF8G0170B4699R3CBDHN",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Keeps main as wiring around a run() function with injected readers and writers, the pattern the repo's cmd/tally uses."
+    },
+    {
+      "run": "run_01M7Z7WF8G0170B4699R3CBDHN",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Tests assert on exact stdout, empty stderr, exit code and the 'tally: line 2: ' prefix, so they would fail on a changed column or dropped diagnostic."
+    },
+    {
+      "run": "run_01M7Z7WF8G0170B4699R3CBDHN",
+      "criterion": "verifier:missing_evidence",
+      "score": 2,
+      "tags": [
+        "missing_evidence"
+      ],
+      "note": "No verifier report and no before/after output of the binary; gates passed but nothing shows the refactored binary behaves as the old main did."
+    },
+    {
+      "run": "run_01M7ZF3TW97YZZ10TXRA4Z36G1",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Diff adds only flags_test.go, a test-only change; gates passed."
+    },
+    {
+      "run": "run_01M7ZF3TW97YZZ10TXRA4Z36G1",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Two tests for one thing: the flag-parse failure path of run()."
+    },
+    {
+      "run": "run_01M7ZF3TW97YZZ10TXRA4Z36G1",
+      "criterion": "builder:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Test-only diff and static gate passed; no before/after counts carried."
+    },
+    {
+      "run": "run_01M7ZF3TW97YZZ10TXRA4Z36G1",
+      "criterion": "builder:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Request is identical to PR 19's (run_01M7Z7WF8G0170B4699R3CBDHN); this run files a second attempt at the same request and it is not recorded whether PR 19 already covered the flag path."
+    },
+    {
+      "run": "run_01M7ZF3TW97YZZ10TXRA4Z36G1",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Only the flag-failure path is tested; no production code changed."
+    },
+    {
+      "run": "run_01M7ZF3TW97YZZ10TXRA4Z36G1",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Calls run() and reuses the twoProjects fixture from main_test.go, the existing test shape."
+    },
+    {
+      "run": "run_01M7ZF3TW97YZZ10TXRA4Z36G1",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Asserts exit code 1, empty stdout, and that stderr names the unknown or valueless flag; these fail if flag errors are swallowed."
+    },
+    {
+      "run": "run_01M7ZF3TW97YZZ10TXRA4Z36G1",
+      "criterion": "verifier:missing_evidence",
+      "score": 2,
+      "tags": [
+        "missing_evidence"
+      ],
+      "note": "No verifier report and no coverage or run output; a gate pass is the only evidence that the new tests run and pass."
+    },
+    {
+      "run": "run_01M7ZN0R6CE1BXZZERH15NDNEG",
+      "criterion": "spec:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "The plan fixes the function, column format, the all-projects-only placement and the Total label; it leaves unsaid what an empty timesheet prints, and the verifier's probe shows the builder chose 'total 0h00m' for that case without the spec deciding it."
+    },
+    {
+      "run": "run_01M7ZN0R6CE1BXZZERH15NDNEG",
+      "criterion": "spec:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Two exact-stdout checks on the built binary with stated exit status, one for the default path and one for --project site."
+    },
+    {
+      "run": "run_01M7ZN0R6CE1BXZZERH15NDNEG",
+      "criterion": "verifier:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Verifier built ./tally and ran both acceptance checks plus file-argument and empty-input probes, reporting exact stdout."
+    },
+    {
+      "run": "run_01M7ZN0R6CE1BXZZERH15NDNEG",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Added exactly the total line on the all-projects path and updated the two tests whose expected output it changed."
+    },
+    {
+      "run": "run_01M7ZN0R6CE1BXZZERH15NDNEG",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Two production lines in main.go and a six-line GrandTotal helper; no new flags or dependencies."
+    },
+    {
+      "run": "run_01M7ZN0R6CE1BXZZERH15NDNEG",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "GrandTotal mirrors ProjectTotal, the same Fprintf and Format column is reused, and summing stays in internal/tally."
+    },
+    {
+      "run": "run_01M7ZN0R6CE1BXZZERH15NDNEG",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "TestGrandTotalSumsEveryEntry checks an exact Total value across mixed projects, and the stdout tests pin the exact total line and its absence under --project."
+    },
+    {
+      "run": "run_01M7ZN0R6CE1BXZZERH15NDNEG",
+      "criterion": "verifier:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Report states the exact stdout for both checks, but the log files it cites (check1-all-projects.log, check2-project-flag.log) are not in to-score.json, so the exact-match claim cannot be checked against the raw output."
+    },
+    {
+      "run": "run_01M7ZN0R6CE1BXZZERH15NDNEG",
+      "criterion": "builder:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Builder report is accurate for the main path but omits that empty input now prints a total line, a behaviour change only the verifier's probe surfaced."
+    },
+    {
+      "run": "run_01M801271ZNXQEY5J8EK9M7BEZ",
+      "criterion": "spec:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Plan gives the exact before and after behaviour, the code placement after fs.Parse, the exact output string and the test file name, and rules out new dependencies and ldflags."
+    },
+    {
+      "run": "run_01M801271ZNXQEY5J8EK9M7BEZ",
+      "criterion": "spec:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Seven runnable checks on the built binary with exact expected lines, stderr byte count, exit status and an stdin-blocking probe."
+    },
+    {
+      "run": "run_01M801A7BGC9D74JXV9WYNT1Z1",
+      "criterion": "spec:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Spec is identical to run_01M801271ZNXQEY5J8EK9M7BEZ (same request, plan and checks); scored on its content."
+    },
+    {
+      "run": "run_01M801A7BGC9D74JXV9WYNT1Z1",
+      "criterion": "spec:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Same runnable checks as the duplicate run; identical content."
+    },
+    {
+      "run": "run_01M801PK4PGZT3NFRP8BY79M3V",
+      "criterion": "spec:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Plan fixes the check's position, error text and the exact-'-' rule, but the title says 'empty project name' while the body says project '-'; the spec resolves that silently rather than saying so."
+    },
+    {
+      "run": "run_01M801PK4PGZT3NFRP8BY79M3V",
+      "criterion": "spec:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Stdin and file-argument checks with exact stderr text and exit 1, plus a my-site regression check that must still total."
+    },
+    {
+      "run": "run_01M801VSPGENHE12X0T4JPCC3Z",
+      "criterion": "spec:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Identical to run_01M801PK4PGZT3NFRP8BY79M3V; title 'empty project name' versus body '-' is resolved silently by the spec."
+    },
+    {
+      "run": "run_01M801VSPGENHE12X0T4JPCC3Z",
+      "criterion": "spec:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Identical to the duplicate run; exact stdin, file and regression checks."
+    },
+    {
+      "run": "run_01M801ZFSGY2163VMJT43RHVCX",
+      "criterion": "spec:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Insertion point, exact error format and the exact-'-' rule are all specified, but the title 'empty project name' versus body '-' is resolved silently; the spec does not say why '-' counts as empty."
+    },
+    {
+      "run": "run_01M801ZFSGY2163VMJT43RHVCX",
+      "criterion": "spec:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Exact stderr text and exit 1 on stdin and file argument, plus a my-site totals check, all runnable on the built binary."
+    },
+    {
+      "run": "run_01M801ZFSGY2163VMJT43RHVCX",
+      "criterion": "verifier:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Verifier built ./tally and ran stdin, file-argument, valid-timesheet and edge checks, and captured the pre-fix output."
+    },
+    {
+      "run": "run_01M801ZFSGY2163VMJT43RHVCX",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Spec research ran the pre-fix build and recorded the '-' row with exit 0 before any change; the verifier's before-fix capture matches."
+    },
+    {
+      "run": "run_01M801ZFSGY2163VMJT43RHVCX",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Only the exact '-' project check and its test were added; my-site is explicitly kept."
+    },
+    {
+      "run": "run_01M801ZFSGY2163VMJT43RHVCX",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Four lines of production code and one test function; main.go is left alone, as the spec asked."
+    },
+    {
+      "run": "run_01M801ZFSGY2163VMJT43RHVCX",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Uses the fmt.Errorf 'line %d: %q' form and placement between the day and duration checks, as the other Parse errors do."
+    },
+    {
+      "run": "run_01M801ZFSGY2163VMJT43RHVCX",
+      "criterion": "builder:untagged",
+      "score": 5,
+      "tags": [
+        "untagged"
+      ],
+      "note": "TestParseRejectsADashProjectAndNamesItsLine compares the exact error string and checks my-site still parses; it would fail if the check were removed."
+    },
+    {
+      "run": "run_01M801ZFSGY2163VMJT43RHVCX",
+      "criterion": "verifier:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Report states exact stderr and exit codes, but the logs it cites (check1-stdin.txt, check4-tests.txt) are not in to-score.json, and its claim that the test fails against the pre-fix tally.go is asserted only in a caption."
+    },
+    {
+      "run": "run_01M801ZFSGY2163VMJT43RHVCX",
+      "criterion": "builder:untagged",
+      "score": 4,
+      "tags": [
+        "untagged"
+      ],
+      "note": "Builder report is accurate; the verifier summary was truncated with an ellipsis (disclosed under problems), and the three attempts and escalation are not mentioned in any report."
+    }
+  ],
+  "problems": [
+    {
+      "title": "missing_evidence in cmd/tally (2×)",
+      "runs": [
+        "run_01M7Z7WF8G0170B4699R3CBDHN",
+        "run_01M7ZF3TW97YZZ10TXRA4Z36G1"
+      ],
+      "route": "definition",
+      "work_item": "wi_01M81ZB8NQYZPWV5SS97AMHYBD",
+      "change": "missing_evidence is something the agent did not know, which a context or model change addresses"
+    },
+    {
+      "title": "missing_evidence in internal/tally (1×)",
+      "runs": [
+        "run_01M7Z7DY01B8J23J5Z86FYCZ4M"
+      ],
+      "route": "definition",
+      "work_item": "wi_01M81ZB8NQBT90V9KA4MV6Z8HR",
+      "change": "missing_evidence is something the agent did not know, which a context or model change addresses"
+    }
+  ]
+}
