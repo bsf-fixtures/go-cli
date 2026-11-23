@@ -1,6 +1,6 @@
 {
   "schema": "ledger/1",
-  "updated_at": "2026-11-22T15:52:39.351Z",
+  "updated_at": "2026-11-23T19:06:18.464Z",
   "open": [
     {
       "work_item": "wi_01M7Z7DACK3FBVDMX3XHEWT52Z",
@@ -59,26 +59,20 @@
       "source_ref": "#30"
     },
     {
-      "work_item": "wi_01M81ZB8NQYZPWV5SS97AMHYBD",
-      "pipeline": "definition",
-      "status": "queued",
-      "fingerprint": "sha256:bdee48421b02dbf1e3968fd6910f55fd37632873dbd8f54217ca726e3c9a838e",
-      "priority": "normal",
-      "created_at": "2026-11-22T15:52:39.351Z",
-      "fixes": [
-        "missing_evidence"
-      ]
-    },
-    {
       "work_item": "wi_01M81ZB8NQBT90V9KA4MV6Z8HR",
       "pipeline": "definition",
       "status": "queued",
-      "fingerprint": "sha256:59c950aa04dcdaa004aee4b0baf5bde5a9979a1efc120ec2559d33110cadda92",
       "priority": "normal",
       "created_at": "2026-11-22T15:52:39.351Z",
-      "fixes": [
-        "missing_evidence"
-      ]
+      "fingerprint": "sha256:59c950aa04dcdaa004aee4b0baf5bde5a9979a1efc120ec2559d33110cadda92"
+    },
+    {
+      "work_item": "wi_01M81ZB8NQYZPWV5SS97AMHYBD",
+      "pipeline": "definition",
+      "status": "queued",
+      "priority": "normal",
+      "created_at": "2026-11-22T15:52:39.351Z",
+      "fingerprint": "sha256:bdee48421b02dbf1e3968fd6910f55fd37632873dbd8f54217ca726e3c9a838e"
     }
   ],
   "recent": [
