@@ -6,7 +6,17 @@
     "product_work": 5.422,
     "definition": 0.6391
   },
-  "inflight": [],
+  "inflight": [
+    {
+      "key": "46044106405-1-score",
+      "pipeline": "definition",
+      "role": "scorer",
+      "model": "claude-haiku-5-5",
+      "agent_ceiling_usd": 1.83,
+      "detection_ceiling_usd": 0.83,
+      "started_at": "2026-11-27T17:45:17.975Z"
+    }
+  ],
   "settled": [
     "44951031834-1-triage",
     "44951424102-1-triage",
@@ -27,5 +37,5 @@
     "45673483003-1-score",
     "45872079705-1-score"
   ],
-  "updated_at": "2026-11-26T18:03:19.162Z"
+  "updated_at": "2026-11-27T17:45:17.975Z"
 }
