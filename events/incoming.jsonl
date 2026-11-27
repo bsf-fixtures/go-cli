@@ -1,1 +1,0 @@
-{"id":1795792966150084,"kind":"issue_comment","at":"2026-11-27T15:22:30Z","actor":"roy-tong","actor_association":"NONE","actor_is_bot":false,"body":"A concrete next check: [aw] No-Op Runs. Put owner, approval and publish receipt on the same record; then assert committed, failed and unknown separately. Can you share the expected receipt for one post?","ref":"#4"}
