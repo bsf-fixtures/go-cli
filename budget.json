@@ -4,19 +4,9 @@
   "spent_usd": {
     "unknown": 0.155,
     "product_work": 5.422,
-    "definition": 0.7316
+    "definition": 0.8224
   },
-  "inflight": [
-    {
-      "key": "46165355644-1-score",
-      "pipeline": "definition",
-      "role": "scorer",
-      "model": "claude-haiku-5-5",
-      "agent_ceiling_usd": 1.83,
-      "detection_ceiling_usd": 0.83,
-      "started_at": "2026-11-28T16:29:57.812Z"
-    }
-  ],
+  "inflight": [],
   "settled": [
     "44951031834-1-triage",
     "44951424102-1-triage",
@@ -36,7 +26,8 @@
     "45467750475-1-score",
     "45673483003-1-score",
     "45872079705-1-score",
-    "46044106405-1-score"
+    "46044106405-1-score",
+    "46165355644-1-score"
   ],
-  "updated_at": "2026-11-28T16:29:57.812Z"
+  "updated_at": "2026-11-28T16:33:32.810Z"
 }
